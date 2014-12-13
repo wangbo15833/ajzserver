@@ -1,0 +1,78 @@
+body {
+	margin: 0px; text-align: center;
+}
+.dhziti {
+	text-align: center; color: rgb(255, 255, 255); font-size: 13px; font-weight: bold;
+}
+.dhziti2 {
+	text-align: center; color: rgb(255, 255, 255); font-size: 12px; font-weight: lighter;
+}
+.biankuang2 {
+	border: 1px solid rgb(0, 0, 0);
+}
+.biankuang3 {
+	border: 1px solid rgb(0, 0, 0);
+}
+p a {
+	color: rgb(255, 255, 255); font-weight: bold; text-decoration: none;
+}
+p a:hover {
+	color: rgb(0, 0, 0); font-size: 13px; text-decoration: none;
+}
+.biankuang {
+	border: 1px solid rgb(87, 85, 85);
+}
+.biankuangleft {
+	border: 1px solid rgb(115, 166, 215);
+}
+a.zuo {
+	color: rgb(0, 0, 0); text-decoration: none;
+}
+a {
+	color: rgb(0, 0, 0); text-decoration: none;
+}
+a:hover {
+	color: rgb(255, 0, 0); text-decoration: none;
+}
+a.zuo:hover {
+	color: rgb(255, 153, 0); font-size: 15px; text-decoration: none;
+}
+.biaozhi {
+	text-align: center; font-size: 5px;
+}
+a.you {
+	color: rgb(255, 255, 255); text-decoration: none;
+}
+a.you:hover {
+	color: rgb(255, 153, 0); font-size: 15px; font-weight: bold; text-decoration: none;
+}
+a.youu {
+	color: rgb(255, 255, 255); text-decoration: none;
+}
+a.youu:hover {
+	color: rgb(0, 0, 0); font-size: 14px; font-weight: bold; text-decoration: none;
+}
+a.youuu {
+	color: rgb(255, 255, 255); text-decoration: none;
+}
+a.youuu:hover {
+	color: rgb(0, 0, 0); font-size: 14px; font-weight: bold; text-decoration: none;
+}
+.ziti {
+	text-align: left; color: rgb(0, 0, 0); font-size: 12px;
+}
+.biaozhi {
+	text-align: center; font-size: 12px;
+}
+.baibt {
+	color: rgb(255, 255, 255); font-size: 14px; font-weight: bold;
+}
+.cptj {
+	text-align: left; color: rgb(0, 102, 255); font-size: 12px;
+}
+.more {
+	font-size: 12px;
+}
+.biankuang {
+	border: 1px solid rgb(87, 85, 85);
+}

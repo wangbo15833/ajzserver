@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="refresh"			content="1;url=graphView.html">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<title>实时曲线</title>
+<script>
+var gr = {
+  makeGraphs: function()
+  {
+    var list = document.getElementsByTagName( 'UL' );
+	for ( var i in list )
+	{
+		if ( list[i].className && list[i].className.match( / ?graph ?/ ) )
+		{
+			this.createGraph( list[i] );
+		}
+	}
+	
+  },
+  createGraph: function( graphList )
+  {
+    var listItems = new Array();
+	var max = 0;
+	if ( graphList.listItems )
+	{
+		listItems = graphList.listItems;
+		max = graphList.maxValue;
+	}
+	else
+	{
+		for ( var x in graphList.childNodes )
+		{
+			if ( graphList.childNodes[x].nodeName == 'LI' )
+			{	
+				listItems.push(graphList.childNodes[x]);
+				max = ( max <= Number(this.getVal( graphList.childNodes[x] )) ) ? this.getVal( graphList.childNodes[x] ) : max;
+				}
+		}
+		graphList.listItems = listItems;
+		graphList.maxValue = max;
+	}
+    // For now.
+	max = max * 1.25;
+	for ( var x = 1; x < listItems.length; x++ )
+	{
+		var cur = Number( this.getVal(listItems[x-1]) );
+		var nex = Number( this.getVal(listItems[x]) );
+		if ( cur <= nex )
+		{
+			listItems[x-1].style.height = cur+'px';
+			listItems[x-1].style.borderTopWidth = (nex - cur)+'px';
+			listItems[x-1].style.marginTop = ( max - ( cur + ( nex - cur ) ) ) + 'px';
+		}
+		else
+		{
+			listItems[x-1].style.height = nex+'px';
+			listItems[x-1].style.borderTopWidth = (cur - nex)+'px';
+			listItems[x-1].style.marginTop = (max - ( nex + ( cur - nex ) ) )+'px';
+			listItems[x-1].className = 'down';
+                        if ( listItems[x-1].valSpan )
+                        {
+                          listItems[x-1].valSpan.style.top = -17 - (cur - nex )+ 'px';
+                        }
+		}
+		listItems[x].style.height = nex + 'px';
+		listItems[x].style.marginTop = ( max - nex )+'px';
+	}
+	if ( listItems[listItems.length-1].className )
+	{
+		listItems[listItems.length-1].className = 'last '+listItems[listItems.length-1].className;
+	}
+	else
+	{
+		listItems[listItems.length-1].className = 'last';
+	}
+
+	graphList.className = graphList.className.replace( /graph/, 'graphon' );
+	graphList.onclick = function() { gr.toggleGraph( this ) }
+	},
+  stopGraph: function ( graphList ) 
+  {
+		for ( var x in graphList.listItems )
+		{
+			graphList.listItems[x].style.cssText = '';
+		}
+		graphList.className = graphList.className.replace( /graphon/, 'graph' );
+  },
+  toggleGraph: function( g )
+  {
+	if ( g.className.match( / ?graphon ?/ ) )
+	{
+		gr.stopGraph( g );
+	}
+	else
+	{
+		 gr.createGraph( g );
+	}
+  },
+  getVal: function ( li )
+  {
+	if ( li.graphValue ) { return li.graphValue }
+	var val = 0;
+	for ( var x in li.childNodes )
+	{
+		if ( li.childNodes[x].className && li.childNodes[x].className == 'val' )
+		{
+			val = li.childNodes[x].firstChild.nodeValue;
+                        li.valSpan = li.childNodes[x];
+		}
+	}
+        
+	li.graphValue = val;
+	return val;
+  }
+};
+</script>
+
+<script>
+
+var ary_data_value =new Array(
+'300',
+'300',
+'300',
+'180',
+'100',
+'200',
+'300',
+'300',
+'300',
+'180',
+'100',
+'200',
+'300',
+'300',
+'300',
+'180',
+'100',
+'200'
+);
+
+var ary_data_time =new Array(
+'1.0',
+'2.0',
+'3.0',
+'4.0',
+'5.0',
+'200',
+'300',
+'300',
+'300',
+'180',
+'100',
+'200',
+'300',
+'300',
+'300',
+'180',
+'100',
+'200'
+);
+
+</script>    
+</head>
+
+<body  onload="gr.makeGraphs()">
+<!--
+<body  >-->
+<div id="man_zone">
+<div id="graphWrap">
+  <ul class="graph">
+		<!--
+    <li><span class="name">1.0</span> <span class="val">300</span></li>
+    <li><span class="name">2.0</span> <span class="val">300</span></li>
+    <li><span class="name">3.0</span> <span class="val">300</span></li>
+    <li><span class="name">4.0</span> <span class="val">180</span></li>
+    <li><span class="name">5.0</span> <span class="val">100</span></li>
+    <li><span class="name">6.0</span> <span class="val">200</span></li>
+    <li><span class="name">7.0</span> <span class="val">150</span></li>
+    <li><span class="name">8.0</span> <span class="val">80</span></li>
+    <li><span class="name">9.0</span> <span class="val">75</span></li>
+    <li><span class="name">10.0</span> <span class="val">125</span></li>
+    <li><span class="name">11.0</span> <span class="val">125</span></li>
+    <li><span class="name">12.0</span> <span class="val">160</span></li>
+    <li><span class="name">13.0</span> <span class="val">160</span></li>
+    <li><span class="name">14.0</span> <span class="val">15</span></li>
+    <li><span class="name">15.0</span> <span class="val">100</span></li>
+    <li><span class="name">16.0</span> <span class="val">0</span></li>
+    <li><span class="name">17.0</span> <span class="val">400</span></li>
+    <li><span class="name">18.0</span> <span class="val">180</span></li>
+    -->
+		<script>
+		for(var i=0; i<18; i++){
+			document.write("<li>");
+			document.write("<span class='name'>");
+			document.write(ary_data_time[i]);
+			document.write("</span>");
+			document.write("<span class='val'>");
+			document.write(ary_data_value[i]);
+			document.write("</span>");
+			document.write("</li>\n");
+		}
+		</script>
+  </ul>
+</div>
+</div>
+
+<input name="fdsdfsfds" type="button"  onclick="gr.makeGraphs();"/>
+</body>
+</html>
+

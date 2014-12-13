@@ -1,0 +1,637 @@
+package com.zagerbone.gzbzgl;
+
+import com.shenghao.arch.baseobject.BasicObject;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.shenghao.arch.util.DBTransUtil;
+import com.zagerbone.util.DBTrans;
+import com.shenghao.arch.util.Tools;
+import com.zagerbone.util.Query;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
+import org.apache.log4j.Logger;
+import sun.jdbc.rowset.CachedRowSet;
+
+// Referenced classes of package com.zagerbone.gzbzgl:
+//            GzbzglDAO, Gzbzgl
+
+/*
+//添加批处理
+transUtil.addSql(strSql.toString());
+
+//执行
+transUtil.executeSql();
+
+//取记录集的数
+transUtil.getRecNumBySelect(strSql.toString())
+
+//取记录集
+transUtil.getResultBySelect(strSql.toString()
+
+//查询条件
+Query
+
+//查询条件体
+HashMap 	body = (HashMap)queryCon.getConditionBody();
+
+
+
+*/
+
+
+
+public class GzbzglDAOImpl extends BasicObject
+    implements GzbzglDAO
+{
+
+    public GzbzglDAOImpl()
+    {
+    }
+
+
+	
+
+		//创建对象
+    public String createGzbzgl(Gzbzgl gzbzgl)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        String fsr = gzbzgl.getProp("fsr");
+        StringBuffer strSql = null;
+        try
+        {
+            strSql = new StringBuffer("insert into TCfaultstandard(");
+            strSql.append("tp_faultcode,tp_faultname,qwbs,qwtime,ybbs,ybtime,zdbs,zdtime,add1,add2,add3,add4,add5");
+            strSql.append(")values(");
+            //strSql.append("getDate(),");//生成日期
+            strSql.append("'").append(gzbzgl.getProp("tp_faultcode")).append("',");
+            strSql.append("'").append(gzbzgl.getProp("tp_faultname")).append("',");
+            strSql.append("'").append(gzbzgl.getProp("qwbs")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("qwtime")      ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("ybbs")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("ybtime")      ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("zdbs")        ).append("',");           
+            strSql.append("'").append(gzbzgl.getProp("zdtime")      ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("add1")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("add2")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("add3")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("add4")        ).append("',");
+            strSql.append("'").append(gzbzgl.getProp("add5")        ).append("')");
+            //strSql.append("'").append(gzbzgl.getProp("Tmeb")).append("',");
+            //strSql.append("'").append(gzbzgl.getProp("Tmebdh")).append("')");
+            log.info(strSql.toString());
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+           fe.printStackTrace();
+           throw new BussinessProcessException(fe.getMessage());
+        }
+        return fsr;
+    }
+    
+    
+
+    public String publishPersonalGzbzgl(Gzbzgl gzbzgl)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        boolean success = false;
+        String jsr = gzbzgl.getProp("jsr");//jsr应替换成？
+        String strJsr[] = Tools.stringCode(jsr);
+        StringBuffer strSql = null;
+        try
+        {
+            for(int i = 0; i < strJsr.length; i++)
+            {
+                strSql = new StringBuffer("insert into TCfaultstandard(dataCreateTime,Cname, Ctype, Cnum, Cmake, Couttime, Cjtime, Ctestmb, Ctestdh, Tnum, Tyqxh, Tyqnum, Tstime, Ttime, Tmeb, Tmebdh) values(getDate(),'");
+                            strSql.append("'").append(gzbzgl.getProp("Cname")).append("',");
+                strSql.append(gzbzgl.getProp("Ctype")).append("',");
+                strSql.append(gzbzgl.getProp("Cmake")).append("',");
+                strSql.append(gzbzgl.getProp("Couttime")).append("',");
+                strSql.append(gzbzgl.getProp("Cjtime")).append("',");
+                strSql.append(gzbzgl.getProp("Ctestmb")).append("',");           
+                strSql.append(gzbzgl.getProp("Ctestdh")).append("',");
+                strSql.append(gzbzgl.getProp("Tnum")).append("',");
+                strSql.append(gzbzgl.getProp("Tyqxh")).append("',");
+                strSql.append(gzbzgl.getProp("Tyqnum")).append("',");
+                strSql.append(gzbzgl.getProp("Tstime")).append("',");
+                strSql.append(gzbzgl.getProp("Tmeb")).append("',");
+                strSql.append(gzbzgl.getProp("Tmebdh")).append("')");
+
+                strSql.append("0").append("')");
+                log.info(strSql.toString());
+                transUtil.addSql(strSql.toString());
+            }
+
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return gzbzgl.getProp("fsr");
+    }
+
+		/*
+    public Query findGzbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from gzbzgl where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = 'all'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from gzbzgl where gzbzglid not in (select top ");
+            strSql.append(minRow).append(" gzbzglid from gzbzgl where jsr = 'all'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" order by gzbzglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append("all").append("' order by gzbzglid desc");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    */
+    
+    public Query findGzbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String id 					= Tools.nvl((String)(String)body.get("id"));//取得查询条件
+        String tp_faultcode = Tools.nvl((String)(String)body.get("tp_faultcode"));//取得查询条件
+        String tp_faultname = Tools.nvl((String)(String)body.get("tp_faultname"));//取得查询条件
+        log.info("tp_faultcode=================================="+tp_faultcode);
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        
+        */
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCfaultstandard where 1=1 ");
+                /*
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                */
+                if(id != null && !id.equals(""))
+                {
+                    strSql.append(" and id ='");
+                    strSql.append(id).append("'");
+                }
+                if(tp_faultcode != null && !tp_faultcode.equals(""))
+                {
+                    strSql.append(" and tp_faultcode ='");
+                    strSql.append(tp_faultcode).append("'");
+                }
+                if(tp_faultname != null && !tp_faultname.equals(""))
+                {
+                    strSql.append(" and tp_faultname ='");
+                    strSql.append(tp_faultname).append("'");
+                }
+                
+                log.info(strSql.toString());
+                
+                
+                               
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from TCfaultstandard where id not in ");
+            strSql.append("(select top ").append(minRow).append(" id from TCfaultstandard where 1=1 )");
+            /*
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" order by gzbzglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append("all").append("' order by gzbzglid desc");
+            */
+            if(id != null && !id.equals(""))
+            {
+                strSql.append(" and id ='");
+                strSql.append(id).append("'");
+            }
+         		if(tp_faultcode != null && !tp_faultcode.equals(""))
+            {
+                strSql.append(" and tp_faultcode ='");
+                strSql.append(tp_faultcode).append("'");
+            }
+            if(tp_faultname != null && !tp_faultname.equals(""))
+            {
+                strSql.append(" and tp_faultname ='");
+                strSql.append(tp_faultname).append("'");
+            }
+            
+            strSql.append(" ");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    
+    public Query findGzbzglList_noPage(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String id 		= Tools.nvl((String)(String)body.get("id"));//取得查询条件
+        String tp_faultcode 	= Tools.nvl((String)(String)body.get("tp_faultcode"));//取得查询条件
+        String tp_faultname 	= Tools.nvl((String)(String)body.get("tp_faultname"));//取得查询条件
+        log.info("findGzbzglList_noPage==================================");
+        log.info("tp_faultcode=================================="+tp_faultcode);
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        
+        */
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCfaultstandard where 1=1 ");
+                /*
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                */
+                if(id != null && !id.equals(""))
+                {
+                    strSql.append(" and id ='");
+                    strSql.append(id).append("'");
+                }
+                if(tp_faultcode != null && !tp_faultcode.equals(""))
+                {
+                    strSql.append(" and tp_faultcode ='");
+                    strSql.append(tp_faultcode).append("'");
+                }
+                if(tp_faultname != null && !tp_faultname.equals(""))
+                {
+                    strSql.append(" and tp_faultname ='");
+                    strSql.append(tp_faultname).append("'");
+                }
+                
+                log.info(strSql.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            
+            
+            strSql.append(" ");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    
+
+    public Query findPersonalGzbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        String jsr = Tools.nvl((String)(String)body.get("jsr"));
+        StringBuffer strSql = null;
+        try
+        {
+						//取得总数,用于分页
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCfaultstandard where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = '").append(jsr).append("'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+						
+						//取得一个页面的结果
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from gzbzgl where gzbzglid not in (select top ");
+            strSql.append(minRow).append(" gzbzglid from gzbzgl where jsr = '");
+            strSql.append(jsr).append("'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            strSql.append(" order by gzbzglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append(jsr).append("' order by gzbzglid desc");
+						queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+						
+						//执行
+            crs = transUtil.getResultBySelect(strSql.toString());
+						
+						//设置到返回的查询条件中
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+
+    public Gzbzgl findGzbzglById(String gzbzglid)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        Gzbzgl gzbzgl = new Gzbzgl();
+        StringBuffer strSql = new StringBuffer("select * from TCfaultstandard where gzbzglid ='");
+        strSql.append(gzbzglid).append("'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs == null || crs.size() == 0)
+                throw new BussinessProcessException("\u8BE5\u901A\u77E5\u4E0D\u5B58\u5728\uFF01");
+            ResultSetMetaData md = crs.getMetaData();
+            int cols = md.getColumnCount();
+            if(crs.next())
+            {
+                gzbzgl.setGzbzglid(crs.getString("gzbzglid"));
+                for(int i = 1; i <= cols; i++)
+                    gzbzgl.setProp(md.getColumnName(i).toLowerCase(), Tools.nvl(crs.getString(i)));
+
+            }
+            strSql = new StringBuffer("update gzbzgl set remark='1' where gzbzglid=");
+            strSql.append("gzbzglid").append("");
+            transUtil.addSql(strSql.toString());
+            transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return gzbzgl;
+    }
+
+		
+		//修改对象
+    public String modifyGzbzgl(Gzbzgl gzbzgl)
+        throws BussinessProcessException
+    {
+        
+        //故障代码 故障名称 轻微标识 轻微停机时长 一般标识 一般停机时长
+        //tp_faultcode tp_faultname qwbs qwtime ybbs ybtime 
+        //tp_faultcode,tp_faultname,qwbs,qwtime,ybbs,ybtime,zdbs,zdtime,add1,add2,add3,add4,add5 
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        StringBuffer strSql = new StringBuffer("update TCfaultstandard set ");
+        strSql.append("tp_faultcode='").append(gzbzgl.getProp("tp_faultcode")).append("',");
+        strSql.append("tp_faultname='").append(gzbzgl.getProp("tp_faultname")).append("',");
+        strSql.append("qwbs='"        ).append(gzbzgl.getProp("qwbs")        ).append("',");
+        strSql.append("qwtime='"      ).append(gzbzgl.getProp("qwtime")      ).append("',");
+        strSql.append("ybbs='"        ).append(gzbzgl.getProp("ybbs")        ).append("',");
+        strSql.append("ybtime='"      ).append(gzbzgl.getProp("ybtime")      ).append("',");
+        strSql.append("zdbs='"        ).append(gzbzgl.getProp("zdbs")        ).append("',");
+        strSql.append("zdtime='"      ).append(gzbzgl.getProp("zdtime")      ).append("',");
+        strSql.append("add1='"        ).append(gzbzgl.getProp("add1")        ).append("',");
+        strSql.append("add2='"        ).append(gzbzgl.getProp("add2")        ).append("',");
+        strSql.append("add3='"        ).append(gzbzgl.getProp("add3")        ).append("',");
+        strSql.append("add4='"        ).append(gzbzgl.getProp("add4")        ).append("',");
+        strSql.append("add5='").append(gzbzgl.getProp("add5")).append("' where id = '");
+        strSql.append(gzbzgl.getGzbzglid()).append("'");
+        log.info(strSql.toString());
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return gzbzgl.getGzbzglid();
+    }
+    
+    
+
+    public String deleteGzbzgl(String gzbzglid)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        int int_gzbzglid = Integer.parseInt(gzbzglid);
+        StringBuffer strSql = new StringBuffer("delete from TCfaultstandard where id = ");
+        strSql.append(int_gzbzglid).append("");
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return gzbzglid;
+    }
+
+    public boolean hasNewGzbzgl(String username)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        boolean success = false;
+        StringBuffer strSql = new StringBuffer("select gzbzglid from gzbzgl where jsr = '");
+        strSql.append(username).append("' and remark='0'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs != null && crs.size() > 0)
+                success = true;
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return success;
+    }
+}

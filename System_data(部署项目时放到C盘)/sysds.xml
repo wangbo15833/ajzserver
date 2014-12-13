@@ -1,0 +1,28 @@
+<?xml version="1.0"	encoding="GBK"	?>
+<datasourcs>
+	<ds>
+		<jndiname>DB-0</jndiname>
+		<dstype>servlet</dstype>
+		<dsname>connectionPool_tdjy</dsname>
+		<dspswd>unhidden</dspswd>
+	</ds>
+	<ds>
+		<jndiname>DB-1</jndiname>
+		<dstype>servlet_nop</dstype>
+		<dsname>connectionPool_nop</dsname>
+		<dspswd>unhidden</dspswd>
+	</ds>
+	<ds>
+		<jndiname>DB_oracle</jndiname>
+		<dstype>servlet_temp</dstype>
+		<dsname>connectionPool_oracle</dsname>
+		<dspswd>hidden</dspswd>
+	</ds>
+	<ds>
+		<jndiname>DB_2_QIXING</jndiname>
+		<dstype>xml</dstype>
+		<dsname>java:comp/env/jdbc/my_db2</dsname>
+		<dspswd>unhidden</dspswd>
+	</ds>
+</datasourcs>
+

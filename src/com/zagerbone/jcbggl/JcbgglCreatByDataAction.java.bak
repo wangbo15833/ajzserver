@@ -1,0 +1,80 @@
+package com.zagerbone.jcbggl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.zagerbone.util.DBTrans;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.jcbggl:
+//            Jcbggl, JcbgglDAOFactory, JcbgglDAO
+
+public class JcbgglCreatByDataAction extends BaseActionSupport
+{
+
+    public JcbgglCreatByDataAction()
+    {
+    }
+
+    //public EventResponse perform(Event evt)
+    public EventResponse perform(DBTrans dbTrans, Event evt)
+    {
+        EventResponse 	returnValue = new EventResponse();
+        JcbgglDAO 			dao 				= JcbgglDAOFactory.getDAO();
+        String fsr = "";
+        try
+        {
+            log.info("hhhhhhhhhhhhhhhhhhhhhhhhh");
+            Jcbggl 		jcbggl = (Jcbggl)processEvent(evt);//获取对象
+            dao.createJcbggl_byData(dbTrans,jcbggl);//创建对象
+            returnValue.setSuccessFlag(true);//设置成功标志
+            returnValue.setBody(fsr);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode("601");
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+		//预处理，生成对象
+    public Object processEvent(Event evt)throws BussinessProcessException
+    {
+        Jcbggl jcbggl = new Jcbggl();//生成检测报告对象
+        HashMap hashBody = evt.getBody();
+        //tp_carname tp_testnum  tp_cartype  tp_testtooltypenum   tp_carnum  tp_testtoolnum  TCjk_startTime
+        //TCjk_endTime  tp_teststarttime  tp_testendtime  tp_testtotaltime    tp_testmeb        tp_testmebphone
+        jcbggl.setProp("tp_carname", 			   (String)hashBody.get("tp_carname")        );//试验编号
+        jcbggl.setProp("tp_testnum", 		     (String)hashBody.get("tp_testnum")        );//获取车辆名称
+        jcbggl.setProp("tp_cartype", 	       (String)hashBody.get("tp_cartype")        );//监控开始时间
+        jcbggl.setProp("tp_testtooltypenum", (String)hashBody.get("tp_testtooltypenum"));//监控结束时间
+        jcbggl.setProp("tp_carnum", 		     (String)hashBody.get("tp_carnum")         );//获取故障代码
+       	jcbggl.setProp("tp_testtoolnum",     (String)hashBody.get("tp_testtoolnum")    );//获取报告操作人姓名
+       	jcbggl.setProp("TCjk_startTime", 		 (String)hashBody.get("TCjk_startTime")    );//
+       	jcbggl.setProp("TCjk_endTime", 		   (String)hashBody.get("TCjk_endTime")      );//
+       	jcbggl.setProp("tp_teststarttime", 	 (String)hashBody.get("tp_teststarttime")  );//
+       	jcbggl.setProp("tp_testendtime", 		 (String)hashBody.get("tp_testendtime")    );//
+       	jcbggl.setProp("tp_testtotaltime", 	 (String)hashBody.get("tp_testtotaltime")  );//
+       	jcbggl.setProp("tp_testmeb", 		     (String)hashBody.get("tp_testmeb")        );//
+       	jcbggl.setProp("tp_testmebphone", 	 (String)hashBody.get("tp_testmebphone")   );//
+        
+        log.info(hashBody);
+        /*
+        //定义不为空的属性
+        if(jcbggl.getProp("tp_carname") == null || jcbggl.getProp("tp_carnum").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else if(jcbggl.getProp("tp_testnum") == null || jcbggl.getProp("tp_testtime").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else{
+           return jcbggl;
+        }
+        */
+        return jcbggl;
+    }
+}

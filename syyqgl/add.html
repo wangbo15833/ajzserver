@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="stylesheet" href="../css/common.css" type="text/css" />
+<link href="../css/calendar-win2k-cold-1.css" rel=stylesheet type=text/css>
+<link rel="stylesheet"  href="css/001.css"  										type="text/css" >
+<link rel="stylesheet"  href="css/style1.css" 									type=text/css>
+<link rel="stylesheet"  href="css/calendar-win2k-cold-1.css"  	type="text/css">
+<title>新增试验仪器</title>
+<script language="JScript" type="text/javascript"  src="../js/calendar.js"> </script>
+<script language="JScript" type="text/javascript"  src="../js/calendar-setup.js"> </script>
+<script language="JScript" type="text/javascript"  src="../js/calendar-zh.js"> </script>
+<script>
+function testColValue(){
+	var colName 			= new Array("Tnum","Cname","tp_testtoolnum");
+	var colHeadName  = new Array("试验编号","车辆名称","试验仪编号");
+	for(var j=0; j<colName.length; j++){
+		if(document.getElementById(colName[j]).value ==''){
+			alert(colHeadName[j]+"不能为空!");
+			document.getElementById(colName[j]).focus();
+			return false;
+		}
+	}
+	return true;
+}
+</script>
+</head>
+<body>
+<iframe id="submitframe" name="submitframe" width="100%" height="100" src="" frameborder="NONE" style="display:none"></iframe> 
+<div id="man_zone" >
+  <form  name="formHead"  action="../MainServlet_sys" onsubmit="return testColValue();" method="post" target="submitframe">
+    <input type="hidden" name="fid" value="FCL00.00.08.01" />
+    <table width="100%" border="0" align="center"  cellpadding="3" cellspacing="1" class="table_style">
+   <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+  <th colspan="4"><font size="+1">新增试验仪器</font></th>
+  <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+  <tr>
+    <td colspan="4" align="right"></td>
+  </tr>
+  <tr>
+  	<td width="32%" class="left_title_1">*试验仪器编号</td>
+    <td width="20%"><input type="text" name="tp_testtoolnum" id="tp_testtoolnum"  value="" /></td>
+    <td width="17%" class="left_title_1"><span class="left-title">试验仪器型号</span></td>
+    <td width="31%"><label for="Cname"></label>
+        <input type="text" name="tp_testtooltypenum" id="tp_testtooltypenum" /></td>
+  </tr>
+  <tr>
+    <td class="left_title_2" style="color:gray">对应测试号</td>
+    <td><input type="text" name="tp_testnum" id="tp_testnum" style="background-color:#cccccc; color:#777777;"  value="" disabled="disabled"/></td>
+    <td class="left_title_2" style="color:gray">测试开始时间</td>
+    <td><input type="text" name="tp_teststarttime" id="tp_teststarttime" style="background-color:#cccccc; color:#777777;" disabled="disabled"/></td>
+  </tr>
+  <tr>
+    <td class="left_title_1" style="color:gray">测试仪器对应车辆编号</td>
+    <td><input type="text" name="tp_carnum" id="tp_carnum" style="background-color:#cccccc; color:#777777;" disabled="disabled"/></td>
+    <td class="left_title_1" style="color:gray">测试仪器对应车辆名称</td>
+    <td><input type="text" name="tp_carname" id="tp_carname" style="background-color:#cccccc; color:#777777;" disabled="disabled"/></td>
+  </tr>
+  <tr >
+    <td colspan="4" align="center"><font color="blue">*为必填项。试验仪器编号必须是8位</font></td>
+  </tr>
+    </table>
+    <div align="center" style="margin-top:5px;">
+      <input type="button" name="button" id="button" value="提交"   onclick="sumitContent();"/>
+      <input type="reset" name="button2" id="button2" value="重置" />
+    </div>
+  </form>
+</div>
+</body>
+</html>
+<script>
+function sumitContent(){
+	var card_id = document.getElementById('tp_testtoolnum').value;//
+	if(	card_id.length != 8){
+		alert('试验仪器编号必须是8位!');
+		return;
+	};
+	formHead.submit();
+}
+</script>

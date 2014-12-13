@@ -1,0 +1,117 @@
+package com.zagerbone.sys_display.servlet;
+
+import org.apache.log4j.*;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import sun.jdbc.rowset.CachedRowSet;
+import com.zagerbone.event.EventResponse;
+import com.zagerbone.exception.BussinessProcessException;
+import com.zagerbone.util.Query;
+import com.zagerbone.util.Tools;
+import com.zagerbone.util.*;
+import com.zagerbone.sys_display.data.*;
+import com.zagerbone.sys_display.dao.*;
+
+public class Sys_displayQueryAction extends HttpServlet{
+	public void service(HttpServletRequest request, HttpServletResponse response)
+			throws java.io.IOException, ServletException {
+		Logger 					log 				= Logger.getLogger(SysTrace.DBLOGGER);
+		EventResponse 	returnValue = new EventResponse();
+		returnValue.setFunctionId("FIIP000.000.003.00");
+		log.info("ActionName:"+returnValue.getFunctionId());
+		String 	dir 			= Tools.delNull(request.getParameter("dir"), "sys_display");
+		String 	fileName 	= Tools.delNull(request.getParameter("fileName"), "sys_display_query.jsp");
+		log.info(dir+"+"+fileName);
+		String 	jndi 		= "";
+		DBTrans dbTrans = new DBTrans(jndi);
+		try{
+			dbTrans.beginTransaction();
+			returnValue.isSafe(request);
+			//returnValue.isRight(request);			
+			String 						tableName_dataArray = Tools.nvl(request.getParameter("tableName_dataArray"));
+			GeneralDataArray 	Sys_displayDATA 		= Sys_displayDAOFactory.getDAO(dbTrans).getDataArrayView(tableName_dataArray);
+			dbTrans.commitTransaction();
+			
+			CachedRowSet 	crs_display = Sys_displayDAOFactory.getDAO(dbTrans).getDisplayDataByPK("displayName", "sys_display");
+			crs_display.next();
+			//String  query_height = crs_display.getString("query_height");
+			String  query_height = query_height = "314";
+			int 		divHeight 	= Integer.parseInt(query_height)-26-2;
+			request.setAttribute("Sys_displayDATA",	Sys_displayDATA);
+			
+			StringBuffer sbr = new StringBuffer();
+			sbr.append(FrameEditTitleTools.titleHeadTable_forQuery("","",""));
+			sbr.append("<table width='100%' border='0' align='center' cellpadding='1' cellspacing='1' bordercolor='#317992' bgcolor='#bdd7d6' class='1pxborder_topVoid' rules='none' >");
+			sbr.append("<tr>"); 
+			sbr.append("	<td scope='col' align='left' id='sub_title'>");
+			sbr.append("	<div style='overflow:auto; height="+divHeight+"'>");
+			sbr.append(QueryFrameTools.queryContentTable_front("FormHead",	"../MainServlet/FIIP000.000.003.02", "listframe") );
+			sbr.append(QueryFrameTools.queryContentTable(
+				Sys_displayDATA.col_queryArrayHead, 
+				Sys_displayDATA.col_queryArray, 
+				Sys_displayDATA.col_queryArrayDisplayType,  
+				Sys_displayDATA.col_queryArrayResponse,
+				Sys_displayDATA.col_queryArrayPop,
+				"#e7f0f7",
+				"font_px13",
+				2,
+				"0",
+					"",
+					"25%",
+					"25%",
+					"FormHead",
+					null,
+					23,
+					8)
+			);
+			//sbr.append(QueryFrameTools.querySubmitTable("#e7f0f7","font_px13", "23") );
+			
+			sbr.append(QueryFrameTools.queryContentTable_after() );
+			sbr.append(FrameTools.arrayFill_originOrder("FormHead",Sys_displayDATA.col_queryArray,Sys_displayDATA.col_queryArrayDisplayType));
+			sbr.append("</div>");
+			
+			//添加查询按钮！
+			sbr.append("<table width='100%' height='40px' border='0' cellpadding='0' cellspacing='0' bordercolor='#FFFFFF' bgcolor='#3399FF'>");
+			sbr.append("<tr bgcolor='#e7f0f7' class='font_px13'>");
+			sbr.append("<td align='center'>");
+			sbr.append("	<input type='submit' 	name='editSubmit' 	value='查询'  onClick='closeQueryframe(); FormHead.submit(); '>&nbsp; &nbsp; &nbsp; &nbsp;");
+			sbr.append("	<input type='reset' 	name='resetButton' 	value='重填' 	onClick='FormHead.reset();'> ");
+			sbr.append("</td>"); 
+			sbr.append("</tr>"); 
+			sbr.append("</table>");
+			
+			sbr.append("<script>");
+			sbr.append("function closeQueryframe(){"); 
+			sbr.append("	parent.document.getElementById('queryframe').style.display = 'none';");
+			sbr.append("	parent.document.getElementById('div_queryframe').style.display = 'none';");
+			sbr.append("	parent.parent.titleFrame.menuframe.closeQueryImg();");
+			sbr.append("}");
+			sbr.append("</script>");
+			sbr.append("</td></tr></table>");
+			
+			request.setAttribute("queryContent",	sbr.toString());
+			
+			if(fileName.equals("sys_display_report.jsp")){
+				sbr = new StringBuffer();
+				sbr.append(FrameEditTitleTools.titleHeadTable_forQuery("","",""));
+				request.setAttribute("queryContent",	sbr.toString());
+			}
+			returnValue.setSuccessFlag(true);
+		}catch(Exception be ){
+				be.printStackTrace();
+				returnValue.setSuccessFlag(false);
+        //returnValue.setErrorMessage(be.getMessage().replace('\n', ' '));
+        dbTrans.rollbackTransaction();
+		}
+		request.setAttribute("result",returnValue);
+		if(returnValue.isSuccessFlag()){
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/"+fileName)).forward(request, response);
+		}else{
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/page_control.jsp")).forward(request, response);
+		}
+	}
+}

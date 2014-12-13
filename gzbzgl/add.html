@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<title>添加故障标准</title>
+</head>
+<body>
+<iframe id="submitframe" name="submitframe" width="100%" height="100" src="" frameborder="NONE" style="display:none"></iframe> 
+<div id="man_zone">
+<form  name="formHead"  action="../MainServlet_sys" onsubmit="return testColValue();" method="post" target="submitframe">
+	<input type="hidden" name="fid" value="FCL00.00.05.01">
+  <table width="100%" border="0" align="center"  cellpadding="3" cellspacing="1" class="table_style">
+   <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+  <th colspan="4"><font size="+1">故障标准录入</font></th>
+   <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+     <tr>
+      <td width="30%" class="left_title_1"><span class="left-title">**故障代码</span></td>
+      <td width="15%"><label for="textfield"></label><input type="text" name="tp_faultcode" id="tp_faultcode"  value=""/></td>
+			<td width="14%" class="left_title_1">**故障名称</td>
+      <td width="41%"><input type="text" name="tp_faultname" id="tp_faultname" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_2">微标标识</td>
+      <td><input type="text" name="qwbs" id="qwbs" /></td>
+            <td class="left_title_2">轻微停机时长</td>
+      <td><input type="text" name="qwtime" id="qwtime" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_1">一般标识</td>
+      <td><input type="text" name="ybbs" id="ybbs" /></td>
+            <td class="left_title_1">一般停机时长</td>
+      <td><input type="text" name="ybtime" id="ybtime" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_2">重大标识</td>
+      <td><input type="text" name="zdbs" id="zdbs" /></td>
+            <td class="left_title_2">重大停机时长</td>
+      <td><input type="text" name="zdtime" id="zdtime" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_1">其它判断条件1</td>
+      <td><input type="text" name="add1" id="add1" /></td>
+            <td class="left_title_1">其它判断条件2</td>
+      <td><input type="text" name="add2" id="add2" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_2">其它判断条件3</td>
+      <td><input type="text" name="add3" id="add3" /></td>
+            <td class="left_title_2">其它判断条件4</td>
+      <td><input type="text" name="add4" id="add4" /></td>
+	</tr>
+	<tr>
+      <td class="left_title_1">其它判断条件5</td>
+      <td><input type="text" name="add5" id="add5" /></td>
+	  <td class="left_title_1">&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+	<tr>
+      <td align="center"  colspan="4"><font color="blue">*为必填项</font></td>
+    </tr>
+	<tr>
+	  <td colspan="4" align="center" ><font color="blue">***添加标准请参考故障标准列表***</font></td>
+    </tr>
+  </table>
+  <div align="center" style="margin-top:20px;">
+  <input type="submit" name="button" id="button" value="提交" />
+  <input type="reset" name="button2" id="button2" value="重置" />
+  </div>
+</form>
+</div>
+</body>
+</html>

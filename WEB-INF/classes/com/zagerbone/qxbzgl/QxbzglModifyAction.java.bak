@@ -1,0 +1,80 @@
+package com.zagerbone.qxbzgl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.qxbzgl:
+//            Qxbzgl, QxbzglDAOFactory, QxbzglDAO
+
+public class QxbzglModifyAction extends BaseActionSupport
+{
+
+    public QxbzglModifyAction()
+    {
+		
+
+    }
+
+    public EventResponse perform(Event evt)
+    {
+        EventResponse returnValue = new EventResponse();
+        QxbzglDAO dao = QxbzglDAOFactory.getDAO();
+        try
+        {
+            Qxbzgl qxbzgl = (Qxbzgl)processEvent(evt);//获取对象
+            String qxbzglid = dao.modifyQxbzgl(qxbzgl);//修改对象
+            returnValue.setSuccessFlag(true);
+            returnValue.setBody(qxbzglid);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode(evt.getFunctionID());
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+		//生成一个对象
+    public Object processEvent(Event evt)
+        throws BussinessProcessException
+    {
+        //parameteName parameteChName configYPerValue configYMinValue configYValueCount 
+        //参数名称 参数中文名称 Y轴单位间隔 Y轴最小单位 Y轴长度 
+        
+        Qxbzgl qxbzgl = new Qxbzgl();
+        HashMap hashBody = evt.getBody();
+        qxbzgl.setQxbzglid((String)hashBody.get("id"));
+        //qxbzgl.setProp("dataOperman", evt.getRealname());//设定修改人名
+        
+        //设置其他修改人
+        qxbzgl.setProp("parameteName", (String)hashBody.get("parameteName"));
+        qxbzgl.setProp("parameteChName", (String)hashBody.get("parameteChName"));
+        qxbzgl.setProp("configYPerValue", (String)hashBody.get("configYPerValue"));
+        qxbzgl.setProp("configYMinValue", (String)hashBody.get("configYMinValue"));
+        qxbzgl.setProp("configYValueCount", (String)hashBody.get("configYValueCount"));
+        
+        /*
+        String CMonitorStatus = com.zagerbone.util.Tools.nvl((String)hashBody.get("CMonitorStatus"));
+        if(CMonitorStatus.equals("取消")){
+        	CMonitorStatus = "0";
+        }
+        qxbzgl.setProp("CMonitorStatus", CMonitorStatus);
+        */
+        if(qxbzgl.getProp("parameteName") == null || qxbzgl.getProp("parameteName").equals("")){
+            throw new BussinessProcessException("参数名称不能为空!");
+        }
+        else if(qxbzgl.getProp("parameteChName") == null || qxbzgl.getProp("parameteChName").equals("")){
+            throw new BussinessProcessException("参数中文名称不能为空!");
+        }
+        else{
+            return qxbzgl;
+        }
+        
+        return qxbzgl;
+    }
+}

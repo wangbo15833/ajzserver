@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<title>曲线参数录入</title>
+<script>
+function testColValue(){
+	var colName 		  = new Array("parameteName" ,"configYPerValue","configYMinValue","configYValueCount");
+	var colHeadName  	= new Array("参数名称","Y轴单位间隔","Y轴最小单位","Y轴长度");
+	for(var j=0; j<colName.length; j++){
+		if(document.getElementById(colName[j]).value ==''){
+			alert(colHeadName[j]+"不能为空!");
+			document.getElementById(colName[j]).focus();
+			return false;
+		}
+	}
+	return true;
+}
+</script>
+</head>
+
+<body>
+
+<iframe id="submitframe" name="submitframe" width="100%" height="100" src="" frameborder="NONE" style="display:none"></iframe> 
+
+<div id="man_zone">
+<form  name="formHead"  action="../MainServlet_sys" onsubmit="return testColValue();" method="post" target="submitframe">
+	<input type="hidden" name="fid" value="FCL00.00.07.01">
+  <table width="100%" border="0" align="center"  cellpadding="3" cellspacing="1" class="table_style">
+  <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+  <th colspan="4"><font size="+1">曲线参数录入</font></th>
+  <tr>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	   <td>&nbsp;</td>
+	</tr>
+    <tr>
+      <td width="33%" class="left_title_1"><span class="left-title">**参数名称</span></td>
+      <td width="15%"><label for="Cname"></label><input type="text" name="parameteName" id="parameteName" /></td>
+      <td width="16%" class="left_title_1">参数中文名称</td>
+      <td width="36%"><input type="text" name="parameteChName" id="parameteChName" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_2">**Y轴单位间隔</td>
+      <td><input type="text" name="configYPerValue" id="configYPerValue" /></td>
+            <td class="left_title_2">**Y轴最小单位</td>
+      <td><input type="text" name="configYMinValue" id="configYMinValue" /></td>
+    </tr>
+    <tr>
+      <td class="left_title_1">**Y轴长度</td>
+      <td><input type="text" name="configYValueCount" id="configYValueCount" /></td>
+            <td class="left_title_1">&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+	<tr>
+      <td align="center"  colspan="4"><font color="blue">*为必填项</font></td>
+    </tr>
+  </table>
+  <div align="center" style="margin-top:20px;">
+  <input type="submit" name="button" id="button" value="提交" />
+  <input type="reset" name="button2" id="button2" value="重置" />
+  </div>
+</form>
+</div>
+</body>
+</html>

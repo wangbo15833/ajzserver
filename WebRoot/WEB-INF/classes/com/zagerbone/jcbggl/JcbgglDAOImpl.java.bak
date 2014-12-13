@@ -1,0 +1,1092 @@
+package com.zagerbone.jcbggl;
+
+import com.shenghao.arch.baseobject.BasicObject;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.shenghao.arch.util.DBTransUtil;
+import com.zagerbone.util.DBTrans;
+import com.shenghao.arch.util.Tools;
+import com.zagerbone.util.Query;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
+import org.apache.log4j.Logger;
+import sun.jdbc.rowset.CachedRowSet;
+
+// Referenced classes of package com.zagerbone.jcbggl:
+//            JcbgglDAO, Jcbggl
+
+/*
+//添加批处理
+transUtil.addSql(strSql.toString());
+
+//执行
+transUtil.executeSql();
+
+//取记录集的数
+transUtil.getRecNumBySelect(strSql.toString())
+
+//取记录集
+transUtil.getResultBySelect(strSql.toString()
+
+//查询条件
+Query
+
+//查询条件体
+HashMap 	body = (HashMap)queryCon.getConditionBody();
+
+*/
+
+public class JcbgglDAOImpl extends BasicObject
+    implements JcbgglDAO
+{
+
+    public JcbgglDAOImpl()
+    {
+    }
+
+		//创建对象
+    public String createJcbggl(Jcbggl jcbggl)throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        String fsr = jcbggl.getProp("fsr");
+        StringBuffer strSql = null;
+        try
+        {
+            strSql = new StringBuffer("insert into TCtestreport(");
+            strSql.append("tp_carproduction,tp_carname, tp_carnum, tp_testnum, tp_testtoolnum, tp_testtooltypenum, tp_testtime, tp_faultcode, tp_fault_stoptime, tp_fault_recovertime, tp_workhour, tp_harvesthour, tp_faulttype,tp_reportoperator");
+            strSql.append(")values(");
+            strSql.append("'").append(jcbggl.getProp("tp_carproduction")    ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_carname")          ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_carnum")           ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_testnum")          ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_testtoolnum")      ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_testtooltypenum")  ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_testtime")         ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_faultcode")        ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_fault_stoptime")   ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_fault_recovertime")).append("',");           
+            strSql.append("'").append(jcbggl.getProp("tp_workhour")         ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_harvesthour")      ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_faulttype")        ).append("',");
+            strSql.append("'").append(jcbggl.getProp("tp_reportoperator")   ).append("')");
+            log.info(strSql.toString());
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+           fe.printStackTrace();
+           throw new BussinessProcessException(fe.getMessage());
+        }
+        return fsr;
+    }
+    
+  //创建对象
+	public void createJcbggl_byData(DBTrans dbTrans, Jcbggl jcbggl)throws BussinessProcessException
+	{
+      DBTrans transUtil = dbTrans;
+      boolean success = false;
+      StringBuffer strSql = null;
+      try
+      {
+      	log.info("---------------------------------------");
+      	String  tp_testnum     	= jcbggl.getProp("tp_testnum");			//试验编号
+	      String 	tp_carname		 	= jcbggl.getProp("tp_carname");  
+	      String 	TCjk_startTime 	= jcbggl.getProp("TCjk_startTime");//监控开始时间  
+	      String 	TCjk_endTime 	 	= jcbggl.getProp("TCjk_endTime");  //监控结束时间
+	      String  tp_fault_begintime = null;
+	      float   TCjk_totaltime  = 0;
+      	String 	TCtestreport_id = null;
+      	String  id_faultfirst   = "0";//首次故障的id
+      	String  cur_tp_fault_begintime  = null; 
+      	String  last_tp_fault_begintime = null;
+      	String  cur_tp_fault_recovertime  = null; 
+      	String  last_tp_fault_recovertime = null;
+        float  first_tp_fault_work       = 0;
+        float  first_tp_fault_recovertime= 0;
+      	StringBuffer sbr_sql = new StringBuffer();
+      	
+      	//将测试信息写入到测试报告表
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("insert into TCtestreport(").append("tp_carproduction,tp_carname, tp_carnum, tp_testnum, tp_testtoolnum, tp_testtooltypenum, TCjk_startTime,TCjk_endTime,tp_teststarttime,tp_testendtime)");
+      	sbr_sql.append("select "									).append("tp_carproduction,tp_carname, tp_carnum, tp_testnum, tp_testtoolnum, tp_testtooltypenum, TCjk_startTime,TCjk_endTime,tp_teststarttime,tp_testendtime ");
+      	sbr_sql.append(" from TCtestcar where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" select @@IDENTITY as id");
+      	log.info(sbr_sql.toString());
+				CachedRowSet crs_master = transUtil.getResultBySelect(sbr_sql.toString());
+				while(crs_master.next()){
+					TCtestreport_id = crs_master.getString("id");
+				}
+				
+      	//更新实验车辆中的报告状态
+				sbr_sql = new StringBuffer();
+				TCjk_totaltime = com.zagerbone.util.Tools.dateMinus_gap(TCjk_endTime,TCjk_startTime);//计算监控总时长
+      	sbr_sql.append("update TCtestcar set Flag_bgzt='1' where 1=1 ").append(" and tp_testnum='").append(tp_testnum).append("' ");
+				log.info(sbr_sql.toString());
+				transUtil.addSql(sbr_sql.toString());
+        transUtil.executeSql();
+				//transUtil.setResultBySelect(sbr_sql.toString());
+				
+				//更新检测报告中的监控总时长
+				sbr_sql = new StringBuffer();
+      	sbr_sql.append("update TCtestreport set TCjk_totaltime='").append(TCjk_totaltime).append("'");
+      	sbr_sql.append("where 1=1 ").append(" and tp_testnum='").append(tp_testnum).append("' ");
+				log.info(sbr_sql.toString());
+				transUtil.addSql(sbr_sql.toString());
+        transUtil.executeSql();
+				
+      	CachedRowSet crs_TCfaultreport = null;
+      	//对故障报告数据进行处理
+      	//1。 轻微故障的次数
+      	String Nqw = "0";
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select count(id) as cishu  from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype='").append("轻微").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	while(crs_TCfaultreport.next()){
+      		Nqw = crs_TCfaultreport.getString("cishu");
+      	}
+      	
+      	//2。 一般故障的次数
+      	String Nyb = "0";
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select count(id) as cishu  from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype='").append("一般").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	while(crs_TCfaultreport.next()){
+      		Nyb = crs_TCfaultreport.getString("cishu");
+      	}      	
+      	//3。 重大故障的次数
+      	String Nzd = "0";
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select count(id) as cishu  from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype='").append("重大").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	while(crs_TCfaultreport.next()){
+      		Nzd = crs_TCfaultreport.getString("cishu");
+      	}
+        //4。 非轻微故障的次数-----------
+      	String Nfqw = "0";
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select count(id) as cishu  from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype!='").append("轻微").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	while(crs_TCfaultreport.next()){
+      		Nfqw = crs_TCfaultreport.getString("cishu");
+      	}
+      	
+      	//5。 全部故障的次数-----------
+      	String Ntotal = "0";
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select count(id) as cishu  from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	//sbr_sql.append(" and tp_faulttype='").append("重大").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	while(crs_TCfaultreport.next()){
+      		Ntotal = crs_TCfaultreport.getString("cishu");
+      	}
+        
+        //判断完故障类型后对故障进行数据处理--这应该放在对所有故障判断完毕之后
+        
+        //*********************根据全部故障计算测试车辆有效度*****************************************
+        //所需的一些参数，提前定义
+        float sum_jg,sum_xf,sum_gz;
+        int i;
+        //-------------计算首次故障前平均工作时间（就是第一次故障出现前车辆的正常工作时间）-----------//
+      	//查找出车辆第一次故障的id，记为id_faultfirst
+      	float TAfirst = 0;
+      	float TAgzjg  = 0;
+        float TArep   = 0;
+        float TAef    = 1;
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select min(id) as id from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype!='").append("").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	if(crs_TCfaultreport.equals("")){//若无故障，则认定除有效度为1外，其他均为0；
+        	//什么也不做；
+        	log.info("无故障，有效度计算结束==================================");
+        }
+        else{
+		      	while(crs_TCfaultreport.next()){
+		      		id_faultfirst = crs_TCfaultreport.getString("id");
+		      	}
+		      	//查找第一次故障的所有信息	
+		      	sbr_sql = new StringBuffer();
+		      	sbr_sql.append("select * from TCfaultreport ");
+		      	sbr_sql.append(" where 1=1 ");
+		      	sbr_sql.append(" and id='").append(id_faultfirst).append("' ");
+		       	log.info(sbr_sql.toString());
+		      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+		      	//在数据集中把所需要的故障信息取出
+		      	while(crs_TCfaultreport.next()){
+		      		tp_fault_begintime 			= crs_TCfaultreport.getString("tp_fault_begintime");
+		      		cur_tp_fault_begintime 	= tp_fault_begintime;
+		      	}
+		      	TAfirst = com.zagerbone.util.Tools.dateMinus_gap(tp_fault_begintime,TCjk_startTime);//计算首次故障前工作时间	      	
+		      	//---------------------------------------------------------------------------------------------//
+		      	
+		        //--------------计算平均故障间隔时间-----------------------------//		        
+		        sum_jg = 0;//时间总和
+		        CachedRowSet crs = null;
+						sbr_sql = new StringBuffer(); 
+						sbr_sql.append("select * from TCfaultreport where 1=1 and tp_testnum='").append(tp_testnum).append("' ");
+						sbr_sql.append(" and tp_faulttype!='").append("").append("' "); 
+						sbr_sql.append(" order by id asc");
+						log.info(sbr_sql.toString()); 
+						crs = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的故障信息
+						i=0;
+						last_tp_fault_begintime = "";
+						if(crs.size()>1){
+								while(crs.next()){
+				      		cur_tp_fault_begintime 	= crs.getString("tp_fault_begintime");//它取的是最后一条故障信息的tp_fault_begintime
+				      	
+								    	if(i>0){//只取第二次以后
+								    		float gap = 0;
+								    		gap = com.zagerbone.util.Tools.dateMinus_gap(cur_tp_fault_begintime,last_tp_fault_begintime);
+								    		sum_jg += gap;
+								    	}
+								    	i++;
+								    	last_tp_fault_begintime = cur_tp_fault_begintime;//置位上次故障开始时间 
+								}
+								TAgzjg = sum_jg/(crs.size()-1); 
+					  }
+					  else{//如果只有一个故障，则认为平均故障间隔为0
+						;
+						}
+		        //---------------------------------------------------------------//
+		        
+		        //--------------计算平均故障修复时间----------------------------//
+		        //在数据库中tp_fault_delay就是故障修复时间
+		         sum_xf 	= 0;
+		         CachedRowSet crs_xf = null;
+						 sbr_sql = new StringBuffer(); 
+						 sbr_sql.append("select * from TCfaultreport where 1=1 and tp_fault_delay>0 "); 
+						 sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+						 sbr_sql.append(" order by id asc");
+						 log.info(sbr_sql.toString()); 
+						 crs_xf = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的故障修复信息
+						 if (crs_xf.size()>0){//当有故障修复信息时，做以下计算
+								i = 0;
+								String  str_tp_fault_delay        = "";
+								float   float_tp_fault_delay      = 0;
+								float   float_tp_fault_delay_last = 0;
+								while(crs_xf.next()){
+				      		str_tp_fault_delay   = crs_xf.getString("tp_fault_delay");//这里是	String类型
+				      		float_tp_fault_delay = Float.parseFloat(str_tp_fault_delay);//转换为double型
+							    		sum_xf += float_tp_fault_delay;
+								      i++;
+							  }
+							  TArep = sum_xf/(crs_xf.size()); //全部都计算
+						 }
+						 else{
+						 ;
+						 }
+		        //--------------------------------------------------------------//
+		        
+		        //--------------计算测试车辆有效度----------------------------//TCjk_totaltime监控总时长
+		        //正常工作时间：总时间(TCjk_totaltime)-所有停机修复时间(tp_fault_delay)之和-所有带故障工作时间(tp_fault_work)之和		        
+			        sum_gz = 0;
+			        CachedRowSet crs_gz = null;
+							sbr_sql = new StringBuffer(); 
+							sbr_sql.append("select * from TCfaultreport where 1=1 and tp_fault_work>0"); 
+							sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+							sbr_sql.append("order by id asc");
+							log.info(sbr_sql.toString()); 
+							crs_gz = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的故障修复信息
+							i = 0;
+							String str_first_tp_fault_work ="";
+							while(crs_gz.next()){
+			      		str_first_tp_fault_work = crs_gz.getString("tp_fault_work");//这里是	String类型
+			      		first_tp_fault_work = Float.parseFloat(str_first_tp_fault_work);//转换为double型
+							    sum_gz+=first_tp_fault_work;
+							    i++;  
+						   }
+						   TAef =((TCjk_totaltime-sum_xf)/TCjk_totaltime)*100;//加入百分号表示,先不记带故障工作时间-sum_gz
+						   log.info("TAef======11============================"+TAef);
+			    }
+        //------------------------------------------------------------------------------------------------//
+        //************************************************************************************************//
+        
+        //*********************根据非轻微故障计算测试车辆有效度*****************************************
+        
+        //----------计算首次非轻微故障前平均工作时间（就是第一次非轻微故障出现前车辆的正常工作时间）----//
+      	//查找出车辆第一次非轻微故障的id，记为id_faultfirst
+      	float FAfirst = 0;
+      	float FAgzjg  = 0;
+        float FArep   = 0;
+        float FAef    = 1;
+      	sbr_sql = new StringBuffer();
+      	sbr_sql.append("select min(id) as id from TCfaultreport ");
+      	sbr_sql.append(" where 1=1 ");
+      	sbr_sql.append(" and tp_carname='").append(tp_carname).append("' ");
+      	sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+      	sbr_sql.append(" and tp_faulttype!='").append("轻微").append("' ");
+      	log.info(sbr_sql.toString());
+      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+      	if(crs_TCfaultreport.equals("")){
+      	;//若无非轻微故障，则计算结束；
+      	}
+      	else{
+      	    while(crs_TCfaultreport.next()){
+		      		id_faultfirst = crs_TCfaultreport.getString("id");
+		      	}
+		      	//查找第一次非轻微故障的所有信息	
+		      	sbr_sql = new StringBuffer();
+		      	sbr_sql.append("select * from TCfaultreport ");
+		      	sbr_sql.append(" where 1=1 ");
+		      	sbr_sql.append(" and id='").append(id_faultfirst).append("' ");
+		       	log.info(sbr_sql.toString());
+		      	crs_TCfaultreport = transUtil.getResultBySelect(sbr_sql.toString());
+		      	//在数据集中把所需要的故障信息取出
+		      	while(crs_TCfaultreport.next()){
+		      		tp_fault_begintime = crs_TCfaultreport.getString("tp_fault_begintime");
+		      		cur_tp_fault_begintime = crs_TCfaultreport.getString("tp_fault_begintime");
+		      	}
+		      	FAfirst = com.zagerbone.util.Tools.dateMinus_gap(tp_fault_begintime,TCjk_startTime);//计算首次非轻微故障前工作时间		      	
+		      	//---------------------------------------------------------------------------------------------//
+		      
+		        //--------------计算平均非轻微故障间隔时间-----------------------------------------------------//
+		        //float FAgzjg = 0;
+		        sum_jg = 0;
+		        CachedRowSet crs_f = null;
+						sbr_sql = new StringBuffer(); 
+						sbr_sql.append("select * from TCfaultreport where 1=1 and tp_testnum='").append(tp_testnum).append("'"); 
+						sbr_sql.append(" and tp_faulttype!='").append("轻微").append("' ");
+						sbr_sql.append("order by id asc");
+						log.info(sbr_sql.toString()); 
+						crs_f = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的非轻微故障信息
+						i = 0;
+						last_tp_fault_begintime = "";
+						if(crs_f.size()>1){//当取出的非轻微故障信息条数大于一个时，做以下计算
+								while(crs_f.next()){
+				      		cur_tp_fault_begintime = crs_f.getString("tp_fault_begintime");
+								    	if(i>0){
+								    		float gap = 0;
+								    		gap = com.zagerbone.util.Tools.dateMinus_gap(cur_tp_fault_begintime,last_tp_fault_begintime);
+								    		sum_jg+=gap;
+								    		i++;
+								    		last_tp_fault_begintime = cur_tp_fault_begintime;
+								      }
+								  FAgzjg = sum_jg/(crs_f.size()-1);   
+							 }
+						}
+						else{//如果只有一个故障，则认为平均故障间隔为0
+								;
+						}
+		        //---------------------------------------------------------------//
+		        	
+		        //--------------计算平均非轻微故障修复时间--------------------------------------------//
+		        //在数据库中tp_fault_delay就是故障修复时间
+		        sum_xf = 0;
+		        CachedRowSet crs_xf = null;
+						sbr_sql = new StringBuffer(); 
+						sbr_sql.append("select * from TCfaultreport where 1=1 and tp_fault_delay>0"); 
+						sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+						sbr_sql.append(" and tp_faulttype!='").append("轻微").append("' ");
+						sbr_sql.append("order by id asc");
+						log.info(sbr_sql.toString()); 
+						crs_xf = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的非轻微故障修复信息
+						if(crs_xf.size()>0){//当有非轻微故障信息时，则计算
+								i = 0;
+								String  str_tp_fault_delay        = "";
+								float   float_tp_fault_delay      = 0;
+								float   float_tp_fault_delay_last = 0;
+								while(crs_xf.next()){
+				      		str_tp_fault_delay = crs_xf.getString("tp_fault_delay");//这里是	String类型
+				      		float_tp_fault_delay = Float.parseFloat(str_tp_fault_delay);//转换为double型
+								  sum_xf+=float_tp_fault_delay;
+								  i++;
+								}
+								FArep = sum_xf/(crs_xf.size());   
+						}
+						else{//没有，则什么都不做
+						;
+						}
+		        //--------------------------------------------------------------------------//
+		        
+		        //--------------计算测试车辆有效度--------------------------------------------//
+		        //正常工作时间：监控总时长(TCjk_totaltime)-所有非轻微故障停机修复时间(tp_fault_delay)之和-所有带非轻微故障工作时间(tp_fault_work)之和
+		        sum_gz = 0;
+		        CachedRowSet crs_gz = null;
+						sbr_sql = new StringBuffer(); 
+						sbr_sql.append("select * from TCfaultreport where 1=1 and tp_fault_work>0"); 
+						sbr_sql.append(" and tp_testnum='").append(tp_testnum).append("' ");
+						sbr_sql.append(" and tp_faulttype!='").append("轻微").append("' ");
+						sbr_sql.append("order by id asc");
+						log.info(sbr_sql.toString()); 
+						crs_gz = transUtil.getResultBySelect(sbr_sql.toString()); //查找这辆车所有的非轻微故障修复信息
+						i = 0;
+						String str_first_tp_fault_work ="";
+						while(crs_gz.next()){
+		      		  str_first_tp_fault_work = crs_gz.getString("tp_fault_work");//这里是	String类型
+		      		  first_tp_fault_work = Float.parseFloat(str_first_tp_fault_work);//转换为double型
+						    sum_gz+=first_tp_fault_work;
+						    i++;  
+					  }
+					  FAef =((TCjk_totaltime-sum_xf)/TCjk_totaltime)*100;//加入百分号表示.先不记带故障工作时间-sum_gz
+					  log.info("FAef======11============================"+FAef);
+				}
+        //--------------------------------------------------------------//
+        
+        //*************************更新所有可靠性计算数据****************************************//
+        sbr_sql = new StringBuffer();
+      	sbr_sql.append("update  TCtestreport set ");
+        sbr_sql.append(" Nqw='"			).append(Nqw).append("', "    );
+        sbr_sql.append(" Nyb='"			).append(Nyb).append("', "    );
+        sbr_sql.append(" Nzd='"			).append(Nzd).append("', "    );
+        sbr_sql.append(" Nfqw='"		).append(Nfqw).append("', "   );
+        sbr_sql.append(" Ntotal='"	).append(Ntotal).append("', " );
+        sbr_sql.append(" TAfirst='"	).append(TAfirst).append("', ");
+        sbr_sql.append(" TAgzjg='"	).append(TAgzjg).append("', " );
+        sbr_sql.append(" TArep='"	  ).append(TArep).append("', "  );
+        sbr_sql.append(" TAef ='"	  ).append(TAef).append("', "   );
+        sbr_sql.append(" FAfirst='"	).append(FAfirst).append("', ");
+        sbr_sql.append(" FAgzjg='"	).append(FAgzjg).append("', " );
+        sbr_sql.append(" FArep='"	  ).append(FArep).append("', "  );
+        sbr_sql.append(" FAef ='"	  ).append(FAef).append("' "    );
+        sbr_sql.append(" where id=").append(TCtestreport_id);
+        log.info(sbr_sql.toString());
+        transUtil.addSql(sbr_sql.toString());
+        success = transUtil.executeSql();
+      	//更新表示检测报告已经生成！
+	    }
+	    catch(Exception fe)
+	    {
+	       fe.printStackTrace();
+	       throw new BussinessProcessException(fe.getMessage());
+	    }
+	    return;
+	}
+    
+    public String publishPersonalJcbggl(Jcbggl jcbggl)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        boolean success = false;
+        String jsr = jcbggl.getProp("jsr");//jsr应替换成？
+        String strJsr[] = Tools.stringCode(jsr);
+        StringBuffer strSql = null;
+        try
+        {
+            for(int i = 0; i < strJsr.length; i++)
+            {
+                strSql = new StringBuffer("insert into TCtestreport(tp_carname, tp_carnum, tp_testnum, tp_testtoolnum,tp_testtooltypenum,tp_testtime, tp_faultcode, tp_fault_stoptime, tp_fault_recovertime, tp_workhour, tp_harvesthour, tp_faulttype, tp_reportoperator,'");
+                strSql.append("'").append(jcbggl.getProp("tp_carname")          ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_carnum")           ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_testnum")          ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_testtoolnum")      ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_testtooltypenum")  ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_testtime")         ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_faultcode")        ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_fault_stoptime")   ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_fault_recovertime")).append("',");           
+		            strSql.append("'").append(jcbggl.getProp("tp_workhour")         ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_harvesthour")      ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_faulttype")        ).append("',");
+		            strSql.append("'").append(jcbggl.getProp("tp_reportoperator")   ).append("')");
+                /*strSql.append(jcbggl.getProp("Tstime")).append("',");
+                strSql.append(jcbggl.getProp("Tmeb")).append("',");
+                strSql.append(jcbggl.getProp("Tmebdh")).append("')");
+                */
+                strSql.append("0").append("')");
+                log.info(strSql.toString());
+                transUtil.addSql(strSql.toString());
+            }
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return jcbggl.getProp("fsr");
+    }
+		/*
+    public Query findJcbgglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from jcbggl where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = 'all'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from jcbggl where jcbgglid not in (select top ");
+            strSql.append(minRow).append(" jcbgglid from jcbggl where jsr = 'all'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" order by jcbgglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append("all").append("' order by jcbgglid desc");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    */
+    
+    public Query findJcbgglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        //从查询体：ConditionBody中取得查询条件HashMap：body ，然后解析出查询条件 ，封装成查询语句，得到查询结果crs,再放入到查询体               
+        String id 		              = Tools.nvl((String)body.get("id")                );//取得查询条件
+        String tp_carproduction 		= Tools.nvl((String)body.get("tp_carproduction")  );//取得查询条件
+        String tp_carname 	        = Tools.nvl((String)body.get("tp_carname")        );//取得查询条件
+        String tp_carnum 	          = Tools.nvl((String)body.get("tp_carnum")         );//取得查询条件
+        String tp_testnum 	        = Tools.nvl((String)body.get("tp_testnum")        );//取得查询条件
+        String tp_testtoolnum 	    = Tools.nvl((String)body.get("tp_testtoolnum")    );//取得查询条件
+        String tp_testtooltypenum 	= Tools.nvl((String)body.get("tp_testtooltypenum"));//取得查询条件
+        String tp_testtime   	      = Tools.nvl((String)body.get("tp_testtime")       );//取得查询条件
+        String tp_faultcode   	    = Tools.nvl((String)body.get("tp_faultcode")      );//取得查询条件
+        String tp_fault_stoptime 	  = Tools.nvl((String)body.get("tp_fault_stoptime") );//取得查询条件
+        String tp_fault_recovertime = Tools.nvl((String)body.get("tp_fault_recovertime"));//取得查询条件
+        String tp_workhour   	      = Tools.nvl((String)body.get("tp_workhour")       );//取得查询条件
+        String tp_harvesthour 	    = Tools.nvl((String)body.get("tp_harvesthour")    );//取得查询条件
+        String tp_faulttype 	      = Tools.nvl((String)body.get("tp_faulttype")      );//取得查询条件
+        String tp_reportoperator 	  = Tools.nvl((String)body.get("tp_reportoperator") );//取得查询条件
+        //String tp_cartype 	      = Tools.nvl((String)body.get("tp_cartype")        );//取得查询条件
+        log.info("tp_carname=================================="+tp_carname);
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        */
+        StringBuffer strSql = null;
+        StringBuffer sbr_sql_con =null;
+        try
+        {
+            //创建查询条件sbr_sql_con
+        		sbr_sql_con = new StringBuffer();
+        		if(id != null && !id.equals(""))
+            {
+                sbr_sql_con.append(" and id ='");
+                sbr_sql_con.append(id).append("'");
+            }
+            if(tp_carproduction != null && !tp_carproduction.equals(""))
+            {
+                sbr_sql_con.append(" and tp_carproduction ='");
+                sbr_sql_con.append(tp_carproduction).append("'");
+            }
+            if(tp_carname != null && !tp_carname.equals(""))
+            {
+                sbr_sql_con.append(" and tp_carname ='");
+                sbr_sql_con.append(tp_carname).append("'");
+            }
+            if(tp_carnum != null && !tp_carnum.equals(""))
+            {
+                sbr_sql_con.append(" and tp_carnum ='");
+                sbr_sql_con.append(tp_carnum).append("'");
+            }
+            if(tp_testnum != null && !tp_testnum.equals(""))
+            {
+                sbr_sql_con.append(" and tp_testnum ='");
+                sbr_sql_con.append(tp_testnum).append("'");
+            }
+            if(tp_testtoolnum != null && !tp_testtoolnum.equals(""))
+            {
+                sbr_sql_con.append(" and tp_testtoolnum ='");
+                sbr_sql_con.append(tp_testtoolnum).append("'");
+            }
+            if(tp_testtooltypenum != null && !tp_testtooltypenum.equals(""))
+            {
+                sbr_sql_con.append(" and tp_testtooltypenum ='");
+                sbr_sql_con.append(tp_testtooltypenum).append("'");
+            }
+            
+            if(tp_testtime != null && !tp_testtime.equals(""))
+            {
+                sbr_sql_con.append(" and tp_testtime ='");
+                sbr_sql_con.append(tp_testtime).append("'");
+            }
+            if(tp_faultcode != null && !tp_faultcode.equals(""))
+            {
+                sbr_sql_con.append(" and tp_faultcode ='");
+                sbr_sql_con.append(tp_faultcode).append("'");
+            }
+            if(tp_fault_stoptime != null && !tp_fault_stoptime.equals(""))
+            {
+                sbr_sql_con.append(" and tp_fault_stoptime ='");
+                sbr_sql_con.append(id).append("'");
+            }
+            if(tp_fault_recovertime != null && !tp_fault_recovertime.equals(""))
+            {
+                sbr_sql_con.append(" and tp_fault_recovertime ='");
+                sbr_sql_con.append(tp_fault_recovertime).append("'");
+            }
+            if(tp_workhour != null && !tp_workhour.equals(""))
+            {
+                sbr_sql_con.append(" and tp_workhour ='");
+                sbr_sql_con.append(tp_workhour).append("'");
+            }
+            if(tp_harvesthour != null && !tp_harvesthour.equals(""))
+            {
+                sbr_sql_con.append(" and tp_harvesthour ='");
+                sbr_sql_con.append(tp_harvesthour).append("'");
+            }
+            if(tp_faulttype != null && !tp_faulttype.equals(""))
+            {
+                sbr_sql_con.append(" and tp_faulttype ='");
+                sbr_sql_con.append(tp_faulttype).append("'");
+            }
+            if(tp_reportoperator != null && !tp_reportoperator.equals(""))
+            {
+                sbr_sql_con.append(" and tp_reportoperator ='");
+                sbr_sql_con.append(tp_reportoperator).append("'");
+            }
+            
+            log.info(sbr_sql_con.toString());
+                                 
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCtestreport where 1=1 ");
+                strSql.append(sbr_sql_con.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            
+            strSql = new StringBuffer();
+						strSql.append("select top ").append(queryCon.getRowsPerPage()).append(" * from TCtestreport where id not in ");
+						strSql.append("(select top ").append(minRow).append(" id from TCtestreport where 1=1 ").append(sbr_sql_con.toString()).append(" order by id asc ) ");
+						strSql.append(sbr_sql_con.toString());
+						strSql.append("  order by id asc "); 
+            
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    
+    public Query findJcbgglList_noPage(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String id 		              = Tools.nvl((String)body.get("id")                );//取得查询条件
+        String tp_carproduction     = Tools.nvl((String)body.get("tp_carproduction")  );//取得查询条件
+        String tp_carname 	        = Tools.nvl((String)body.get("tp_carname")        );//取得查询条件
+        String tp_carnum 	          = Tools.nvl((String)body.get("tp_carnum")         );//取得查询条件
+        String tp_testnum 	        = Tools.nvl((String)body.get("tp_testnum")        );//取得查询条件
+        String tp_testtoolnum 	    = Tools.nvl((String)body.get("tp_testtoolnum")    );//取得查询条件
+        String tp_testtooltypenum 	= Tools.nvl((String)body.get("tp_testtooltypenum"));//取得查询条件
+        String tp_testtime   	      = Tools.nvl((String)body.get("tp_testtime")       );//取得查询条件
+        String tp_faultcode   	    = Tools.nvl((String)body.get("tp_faultcode")      );//取得查询条件
+        String tp_fault_stoptime 	  = Tools.nvl((String)body.get("tp_fault_stoptime") );//取得查询条件
+        String tp_fault_recovertime = Tools.nvl((String)body.get("tp_fault_recovertime"));//取得查询条件
+        String tp_workhour   	      = Tools.nvl((String)body.get("tp_workhour")       );//取得查询条件
+        String tp_harvesthour 	    = Tools.nvl((String)body.get("tp_harvesthour")    );//取得查询条件
+        String tp_faulttype 	      = Tools.nvl((String)body.get("tp_faulttype")      );//取得查询条件
+        String tp_reportoperator 	  = Tools.nvl((String)body.get("tp_reportoperator") );//取得查询条件
+        log.info("findJcbgglList_noPage==================================");
+        log.info("tp_carname=================================="+tp_carname);
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        
+        */
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCtestreport where 1=1 ");
+                if(id != null && !id.equals(""))
+                {
+                    strSql.append(" and id ='");
+                    strSql.append(id).append("'");
+                }
+                if(tp_carproduction != null && !tp_carproduction.equals(""))
+                {
+                    strSql.append(" and tp_carproduction ='");
+                    strSql.append(tp_carproduction).append("'");
+                }
+                if(tp_carname != null && !tp_carname.equals(""))
+                {
+                    strSql.append(" and tp_carname ='");
+                    strSql.append(tp_carname).append("'");
+                }
+                if(tp_carnum != null && !tp_carnum.equals(""))
+                {
+                    strSql.append(" and tp_carnum ='");
+                    strSql.append(tp_carnum).append("'");
+                }
+                if(tp_testnum != null && !tp_testnum.equals(""))
+                {
+                    strSql.append(" and tp_testnum ='");
+                    strSql.append(tp_testnum).append("'");
+                }
+                if(tp_testtoolnum != null && !tp_testtoolnum.equals(""))
+                {
+                    strSql.append(" and tp_testtoolnum ='");
+                    strSql.append(tp_testtoolnum).append("'");
+                }
+                if(tp_testtooltypenum != null && !tp_testtooltypenum.equals(""))
+                {
+                    strSql.append(" and tp_testtooltypenum ='");
+                    strSql.append(tp_testtooltypenum).append("'");
+                }
+                
+                if(tp_testtime != null && !tp_testtime.equals(""))
+                {
+                    strSql.append(" and tp_testtime ='");
+                    strSql.append(tp_testtime).append("'");
+                }
+                if(tp_faultcode != null && !tp_faultcode.equals(""))
+                {
+                    strSql.append(" and tp_faultcode ='");
+                    strSql.append(tp_faultcode).append("'");
+                }
+                if(tp_fault_stoptime != null && !tp_fault_stoptime.equals(""))
+                {
+                    strSql.append(" and tp_fault_stoptime ='");
+                    strSql.append(id).append("'");
+                }
+                if(tp_fault_recovertime != null && !tp_fault_recovertime.equals(""))
+                {
+                    strSql.append(" and tp_fault_recovertime ='");
+                    strSql.append(tp_fault_recovertime).append("'");
+                }
+                if(tp_workhour != null && !tp_workhour.equals(""))
+                {
+                    strSql.append(" and tp_workhour ='");
+                    strSql.append(tp_workhour).append("'");
+                }
+                if(tp_harvesthour != null && !tp_harvesthour.equals(""))
+                {
+                    strSql.append(" and tp_harvesthour ='");
+                    strSql.append(tp_harvesthour).append("'");
+                }
+                if(tp_faulttype != null && !tp_faulttype.equals(""))
+                {
+                    strSql.append(" and tp_faulttype ='");
+                    strSql.append(tp_faulttype).append("'");
+                }
+                if(tp_reportoperator != null && !tp_reportoperator.equals(""))
+                {
+                    strSql.append(" and tp_reportoperator ='");
+                    strSql.append(tp_reportoperator).append("'");
+                }
+                
+                log.info(strSql.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            
+            
+            strSql.append(" ");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    
+
+    public Query findPersonalJcbgglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        String jsr = Tools.nvl((String)(String)body.get("jsr"));
+        StringBuffer strSql = null;
+        try
+        {
+						//取得总数,用于分页
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCtestreport where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = '").append(jsr).append("'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+						
+						//取得一个页面的结果
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from jcbggl where jcbgglid not in (select top ");
+            strSql.append(minRow).append(" jcbgglid from jcbggl where jsr = '");
+            strSql.append(jsr).append("'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            strSql.append(" order by jcbgglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append(jsr).append("' order by jcbgglid desc");
+						queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+						
+						//执行
+            crs = transUtil.getResultBySelect(strSql.toString());
+						
+						//设置到返回的查询条件中
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+
+    public Jcbggl findJcbgglById(String jcbgglid)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        Jcbggl jcbggl = new Jcbggl();
+        StringBuffer strSql = new StringBuffer("select * from TCtestreport where jcbgglid ='");
+        strSql.append(jcbgglid).append("'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs == null || crs.size() == 0)
+                throw new BussinessProcessException("\u8BE5\u901A\u77E5\u4E0D\u5B58\u5728\uFF01");
+            ResultSetMetaData md = crs.getMetaData();
+            int cols = md.getColumnCount();
+            if(crs.next())
+            {
+                jcbggl.setJcbgglid(crs.getString("jcbgglid"));
+                for(int i = 1; i <= cols; i++)
+                    jcbggl.setProp(md.getColumnName(i).toLowerCase(), Tools.nvl(crs.getString(i)));
+
+            }
+            strSql = new StringBuffer("update jcbggl set remark='1' where jcbgglid=");
+            strSql.append("jcbgglid").append("");
+            transUtil.addSql(strSql.toString());
+            transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return jcbggl;
+    }
+
+		
+		//修改对象
+    public String modifyJcbggl(Jcbggl jcbggl)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        StringBuffer strSql = null;
+        strSql = new StringBuffer();//生成修改的sql语句
+        //id, tp_carname, tp_carnum, tp_testnum, tp_testtime, tp_faultcode, tp_fault_stoptime, tp_fault_recovertime, tp_workhour, tp_harvesthour, tp_faulttype,tp_reportoperator
+        strSql.append("update TCtestreport set ");
+        strSql.append("tp_carproduction='"    ).append(jcbggl.getProp("tp_carproduction")    ).append("',");
+        strSql.append("tp_carname='"          ).append(jcbggl.getProp("tp_carname")          ).append("',");
+        strSql.append("tp_carnum='"           ).append(jcbggl.getProp("tp_carnum")           ).append("',");
+        strSql.append("tp_testnum='"          ).append(jcbggl.getProp("tp_testnum")          ).append("',");
+        strSql.append("tp_testtoolnum='"      ).append(jcbggl.getProp("tp_testtoolnum")      ).append("',");
+        strSql.append("tp_testtooltypenum='"  ).append(jcbggl.getProp("tp_testtooltypenum")  ).append("',");       
+        strSql.append("tp_testtime='"         ).append(jcbggl.getProp("tp_testtime")         ).append("',");
+        strSql.append("tp_faultcode='"        ).append(jcbggl.getProp("tp_faultcode")        ).append("',");
+        strSql.append("tp_fault_stoptime='"   ).append(jcbggl.getProp("tp_fault_stoptime")   ).append("',");
+        strSql.append("tp_fault_recovertime='").append(jcbggl.getProp("tp_fault_recovertime")).append("',");
+        strSql.append("tp_workhour='"         ).append(jcbggl.getProp("tp_workhour")         ).append("',");
+        strSql.append("tp_harvesthour='"      ).append(jcbggl.getProp("tp_harvesthour")      ).append("',");
+        strSql.append("tp_faulttype='"        ).append(jcbggl.getProp("tp_faulttype")        ).append("',");
+        strSql.append("tp_reportoperator='"   ).append(jcbggl.getProp("tp_reportoperator")   ).append("' where id = '");
+        strSql.append(jcbggl.getJcbgglid()).append("'");
+        log.info(strSql.toString());
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return jcbggl.getJcbgglid();
+    }
+    
+    public String deleteJcbggl(String jcbgglid)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        int int_jcbgglid = Integer.parseInt(jcbgglid);
+        StringBuffer strSql = new StringBuffer("delete from TCtestreport where id = ");
+        strSql.append(int_jcbgglid).append("");
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return jcbgglid;
+    }
+
+    public boolean hasNewJcbggl(String username)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        boolean success = false;
+        StringBuffer strSql = new StringBuffer("select jcbgglid from jcbggl where jsr = '");
+        strSql.append(username).append("' and remark='0'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs != null && crs.size() > 0)
+                success = true;
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return success;
+    }
+}

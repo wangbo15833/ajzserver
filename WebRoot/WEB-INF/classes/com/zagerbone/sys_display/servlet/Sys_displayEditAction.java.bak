@@ -1,0 +1,74 @@
+package com.zagerbone.sys_display.servlet;
+import org.apache.log4j.*;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import sun.jdbc.rowset.CachedRowSet;
+import com.zagerbone.event.EventResponse;
+import com.zagerbone.exception.BussinessProcessException;
+import com.zagerbone.util.*;
+import com.zagerbone.sys_display.data.*;
+import com.zagerbone.sys_display.dao.*;
+
+
+public class Sys_displayEditAction extends HttpServlet{
+	public void service(HttpServletRequest request, HttpServletResponse response)
+		throws java.io.IOException, ServletException {
+		Logger 					log 				= Logger.getLogger(SysTrace.DBLOGGER);
+		EventResponse 	returnValue = new EventResponse();
+		returnValue.setFunctionId("FIIP000.000.003.03");
+		log.info("ActionName:"+returnValue.getFunctionId());
+		
+		String 	dir 			= Tools.delNull(request.getParameter("dir"), "sys_display");
+		String 	fileName 	= Tools.delNull(request.getParameter("fileName"), "sys_display_edit.jsp");
+		log.info(dir+"+"+fileName);
+		
+		String 	jndi 		= "";
+		DBTrans dbTrans = new DBTrans(jndi);
+		try{
+			dbTrans.beginTransaction();
+			returnValue.isSafe(request);
+			//returnValue.isRight(request);
+			String 					tableName_dataArray = Tools.nvl(request.getParameter("tableName_dataArray"));
+			GeneralDataArray 	Sys_displayDATA = Sys_displayDAOFactory.getDAO(dbTrans).getDataArrayView(tableName_dataArray);
+			dbTrans.commitTransaction();
+			request.setAttribute("Sys_displayDATA",Sys_displayDATA);
+			
+			StringBuffer sbr = new StringBuffer();
+			//sbr.append(FrameEditTitleTools.titleHeadTable("22222","","") );
+			sbr.append(PageTools.editContentTable_front("formHead") );
+			sbr.append(EditFrameTools.editContentTable(
+					Sys_displayDATA.col_arrayHead , 
+					Sys_displayDATA.col_array ,  
+					Sys_displayDATA.col_arrayDisplayType,
+					Sys_displayDATA.col_arrayResponse,
+					Sys_displayDATA.col_arrayPop, 
+					"#e7f0f7",  "font_px13", 3,  "5") 
+			);
+			sbr.append(PageTools.editContentTable_div_origin("div_origin", "#e7f0f7", "30"));
+			sbr.append(PageTools.editContentTable_after() );
+			sbr.append(PageTools.editSubmitTable( "#e7f0f7",  "font_px13",  "5") );
+			sbr.append(FrameTools.arrayFill_originOrder("formHead",Sys_displayDATA.col_array, Sys_displayDATA.col_arrayDisplayType) );
+			sbr.append(PageTools.editSubmitFunction("../MainServlet/FIIP000.000.003") );
+			log.info("sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()sbr.toString()="+sbr.toString());
+			request.setAttribute("eidtContent",	sbr.toString());
+			
+			returnValue.setSuccessFlag(true);
+		}catch(Exception be ){
+				be.printStackTrace();
+				returnValue.setSuccessFlag(false);
+        //returnValue.setErrorMessage(be.getMessage().replace('\n', ' '));
+        dbTrans.rollbackTransaction();
+		}
+		request.setAttribute("result",returnValue);
+		if(returnValue.isSuccessFlag()){
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/"+fileName)).forward(request, response);
+		}else{
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/page_control.jsp")).forward(request, response);
+		}
+	}
+}

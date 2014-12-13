@@ -1,0 +1,114 @@
+BODY {
+	SCROLLBAR-FACE-COLOR: #eeeeee; SCROLLBAR-HIGHLIGHT-COLOR: #dddddd; SCROLLBAR-SHADOW-COLOR: #cccccc; SCROLLBAR-ARROW-COLOR: #cccccc; SCROLLBAR-TRACK-COLOR: #eeeeee; SCROLLBAR-DARKSHADOW-COLOR: #666666; SCROLLBAR-BASE-COLOR: #cccccc
+}
+A:link {
+	TEXT-DECORATION: none
+}
+A:visited {
+	TEXT-DECORATION: none
+}
+A:hover {
+	
+}
+TD {
+	FONT-SIZE: 12px; FONT-FAMILY: 宋体,隶书,MS SONG,SimSun,tahoma,sans-serif
+}
+.tapstrip_font {
+	FONT-SIZE: 12px; COLOR: #000066; FONT-FAMILY: 宋体,MS SONG,SimSun,tahoma,sans-serif
+}
+.menu_deepcolor {
+	BACKGROUND: #336699
+}
+.font_inclined {
+	FONT-SIZE: 12px; COLOR: #000066; FONT-STYLE: italic; FONT-FAMILY: "宋体", "MS SONG", "SimSun", "tahoma", "sans-serif"
+}
+.font_white {
+	FONT-SIZE: 12px; COLOR: #ffffff; FONT-FAMILY: 宋体,MS SONG,SimSun,tahoma,sans-serif
+}
+.menu_undertone {
+	BACKGROUND: #93bee2
+}
+.font_blue {
+	FONT-SIZE: 12px; COLOR: #000066; FONT-FAMILY: 宋体,MS SONG,SimSun,tahoma,sans-serif
+}
+.menu_lightcolor {
+	BACKGROUND: #d8e8f5
+}
+.font_yellow {
+	FONT-SIZE: 12px; COLOR: #990000
+}
+.font_red {
+	FONT-SIZE: 12px; COLOR: #ff0000
+}
+.form_button {
+	BORDER-RIGHT: #dddddd 1px double; BORDER-TOP: #ffffff 1px double; FONT-WEIGHT: bold; FONT-SIZE: 12px; BACKGROUND: #eeeeee; VERTICAL-ALIGN: middle; BORDER-LEFT: #ffffff 1px double; CURSOR: hand; COLOR: #000000; BORDER-BOTTOM: #dddddd 1px double; FONT-FAMILY: "宋体", "MS SONG", "SimSun", "tahoma", "sans-serif"; HEIGHT: 24px
+}
+.font-14 {
+	FONT-SIZE: 14px; COLOR: #ffffff; FONT-FAMILY: "宋体", "MS SONG", "SimSun", "tahoma", "sans-serif"
+}
+.font-12 {
+	FONT-SIZE: 12px; FONT-FAMILY: "宋体", "MS SONG", "SimSun", "tahoma", "sans-serif"
+}
+.black_border {
+	BORDER-RIGHT: #000000 1px double; BORDER-TOP: #000000 1px double; BORDER-LEFT: #000000 1px double; BORDER-BOTTOM: #000000 1px double
+}
+.margin_3px {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px
+}
+.form_input {
+	BORDER-RIGHT: #eeeeee 1px double; BORDER-TOP: #cccccc 1px double; FONT-SIZE: 14px; BORDER-LEFT: #cccccc 1px double; BORDER-BOTTOM: #eeeeee 1px double; FONT-FAMILY: "宋体"; HEIGHT: 20px
+}
+.tb_head {
+	BORDER-RIGHT: #dddddd 1px double; BORDER-TOP: #ffffff 1px double; FONT-SIZE: 12px; VERTICAL-ALIGN: middle; BORDER-LEFT: #ffffff 1px double; COLOR: #000000; BORDER-BOTTOM: #dddddd 1px double; FONT-FAMILY: "宋体"; HEIGHT: 26px; BACKGROUND-COLOR: #93bee2
+}
+.form_textarea {
+	BORDER-RIGHT: #eeeeee 1px double; BORDER-TOP: #cccccc 1px double; BORDER-LEFT: #cccccc 1px double; BORDER-BOTTOM: #eeeeee 1px double
+}
+.form_droplist {
+	BORDER-RIGHT: #eeeeee 1px double; BORDER-TOP: #cccccc 1px double; FONT-SIZE: 12px; BORDER-LEFT: #cccccc 1px double; BORDER-BOTTOM: #eeeeee 1px double; FONT-FAMILY: "宋体"; HEIGHT: 24px
+}
+.form_multilist {
+	BORDER-RIGHT: #eeeeee 1px double; BORDER-TOP: #cccccc 1px double; FONT-SIZE: 12px; BORDER-LEFT: #cccccc 1px double; BORDER-BOTTOM: #eeeeee 1px double; FONT-FAMILY: "宋体"
+}
+.font_login {
+	FONT-SIZE: 14px; COLOR: #000000; FONT-FAMILY: "宋体"
+}
+.td_inset {
+	BORDER-RIGHT: #eeeeee 1px double; PADDING-RIGHT: 5px; BORDER-TOP: #cccccc 1px double; PADDING-LEFT: 5px; FONT-SIZE: 12px; PADDING-BOTTOM: 5px; BORDER-LEFT: #cccccc 1px double; PADDING-TOP: 5px; BORDER-BOTTOM: #eeeeee 1px double; FONT-FAMILY: "宋体"
+}
+.root {
+	PADDING-LEFT: 5px; FONT-WEIGHT: bold; FONT-SIZE: 14px; CURSOR: hand; FONT-STYLE: normal; FONT-FAMILY: "宋体", "Tahoma"; HEIGHT: 16px
+}
+.department {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; CURSOR: hand; COLOR: #996666; FONT-FAMILY: "宋体", "Tahoma"; HEIGHT: 16px
+}
+.employee {
+	FONT-SIZE: 12px; CURSOR: hand; FONT-FAMILY: "宋体", "Tahoma"; HEIGHT: 16px
+}
+.leader {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; CURSOR: hand; COLOR: #336699; FONT-FAMILY: "宋体", "Tahoma"; HEIGHT: 16px
+}
+.tree_ic {
+	FONT-SIZE: 12px; VERTICAL-ALIGN: top; WIDTH: 19px; FONT-FAMILY: "宋体", "Tahoma"; HEIGHT: 16px
+}
+.cls_text_tbread {
+	BORDER-RIGHT: 0px double; BORDER-TOP: 0px double; FONT-SIZE: 12px; BORDER-LEFT: 0px double; WIDTH: 120px; BORDER-BOTTOM: 0px double; FONT-FAMILY: "宋体"; BACKGROUND-COLOR: transparent; TEXT-ALIGN: center
+}
+.cls_td_head {
+	BORDER-RIGHT: #999999 1px solid; BORDER-TOP: #ffffff 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #ffffff 0px solid; COLOR: #ffffff; BORDER-BOTTOM: #999999 1px solid; FONT-FAMILY: "宋体"; HEIGHT: 22px; BACKGROUND-COLOR: #336699; TEXT-ALIGN: center
+}
+.cls_text_number {
+	BORDER-RIGHT: #000000 1px solid; BORDER-TOP: #000000 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #000000 1px solid; WIDTH: 40px; BORDER-BOTTOM: #000000 1px solid; FONT-FAMILY: "宋体"; BACKGROUND-COLOR: #ffffff; TEXT-ALIGN: center
+}
+.cls_td_mainbox {
+	BORDER-RIGHT: black 0px solid; BORDER-TOP: black 0px solid; BORDER-LEFT: #cccccc 0px solid; BORDER-BOTTOM: black 0px solid
+}
+.cls_tb_cellr {
+	BORDER-RIGHT: #ffffff 1px solid; BORDER-TOP: black 0px solid; BORDER-LEFT: #cccccc 0px solid; BORDER-BOTTOM: #cccccc 1px solid; BACKGROUND-COLOR: #ffffff; TEXT-ALIGN: left
+}
+.cls_td_cell {
+	BORDER-RIGHT: #cccccc 1px solid; BORDER-TOP: black 0px solid; FONT-SIZE: 12px; VERTICAL-ALIGN: middle; BORDER-LEFT: black 0px solid; COLOR: #000000; BORDER-BOTTOM: #cccccc 1px solid; FONT-FAMILY: "宋体"; HEIGHT: 22px; TEXT-ALIGN: center
+}
+.cls_td_fcell {
+	BORDER-RIGHT: #cccccc 1px solid; BORDER-TOP: black 0px solid; FONT-SIZE: 12px; VERTICAL-ALIGN: middle; BORDER-LEFT: #cccccc 1px solid; COLOR: #000000; BORDER-BOTTOM: #cccccc 1px solid; FONT-FAMILY: "宋体"; HEIGHT: 22px; TEXT-ALIGN: center
+}

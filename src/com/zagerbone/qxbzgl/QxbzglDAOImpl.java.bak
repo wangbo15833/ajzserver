@@ -1,0 +1,551 @@
+package com.zagerbone.qxbzgl;
+
+import com.shenghao.arch.baseobject.BasicObject;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.shenghao.arch.util.DBTransUtil;
+import com.zagerbone.util.DBTrans;
+import com.shenghao.arch.util.Tools;
+import com.zagerbone.util.Query;
+import java.sql.ResultSetMetaData;
+import java.util.HashMap;
+import org.apache.log4j.Logger;
+import sun.jdbc.rowset.CachedRowSet;
+
+// Referenced classes of package com.zagerbone.qxbzgl:
+//            QxbzglDAO, Qxbzgl
+
+/*
+//添加批处理
+transUtil.addSql(strSql.toString());
+
+//执行
+transUtil.executeSql();
+
+//取记录集的数
+transUtil.getRecNumBySelect(strSql.toString())
+
+//取记录集
+transUtil.getResultBySelect(strSql.toString()
+
+//查询条件
+Query
+
+//查询条件体
+HashMap 	body = (HashMap)queryCon.getConditionBody();
+
+
+
+*/
+
+
+
+public class QxbzglDAOImpl extends BasicObject
+    implements QxbzglDAO
+{
+
+    public QxbzglDAOImpl()
+    {
+    }
+
+
+	
+
+		//创建对象
+    public String createQxbzgl(Qxbzgl qxbzgl)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        String fsr = qxbzgl.getProp("fsr");
+        StringBuffer strSql = null;
+        try
+        {
+            strSql = new StringBuffer("insert into TCParaCureStand(");
+            strSql.append("parameteName,parameteChName,configYPerValue,configYMinValue,configYValueCount");
+            strSql.append(")values(");
+            //strSql.append("getDate(),");//生成日期
+            strSql.append("'").append(qxbzgl.getProp("parameteName")).append("',");
+            strSql.append("'").append(qxbzgl.getProp("parameteChName")).append("',");
+            strSql.append("'").append(qxbzgl.getProp("configYPerValue")).append("',");
+            strSql.append("'").append(qxbzgl.getProp("configYMinValue")).append("',");
+            strSql.append("'").append(qxbzgl.getProp("configYValueCount")).append("')");
+            log.info(strSql.toString());
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+           fe.printStackTrace();
+           throw new BussinessProcessException(fe.getMessage());
+        }
+        return fsr;
+    }
+    
+    
+
+    public String publishPersonalQxbzgl(Qxbzgl qxbzgl)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        boolean success = false;
+        String jsr = qxbzgl.getProp("jsr");//jsr应替换成？
+        String strJsr[] = Tools.stringCode(jsr);
+        StringBuffer strSql = null;
+        try
+        {
+            for(int i = 0; i < strJsr.length; i++)
+            {
+                strSql = new StringBuffer("insert into TCParaCureStand(dataCreateTime,Cname, Ctype, Cnum, Cmake, Couttime, Cjtime, Ctestmb, Ctestdh, Tnum, Tyqxh, Tyqnum, Tstime, Ttime, Tmeb, Tmebdh) values(getDate(),'");
+                            strSql.append("'").append(qxbzgl.getProp("Cname")).append("',");
+                strSql.append(qxbzgl.getProp("Ctype")).append("',");
+                strSql.append(qxbzgl.getProp("Cmake")).append("',");
+                strSql.append(qxbzgl.getProp("Couttime")).append("',");
+                strSql.append(qxbzgl.getProp("Cjtime")).append("',");
+                strSql.append(qxbzgl.getProp("Ctestmb")).append("',");           
+                strSql.append(qxbzgl.getProp("Ctestdh")).append("',");
+                strSql.append(qxbzgl.getProp("Tnum")).append("',");
+                strSql.append(qxbzgl.getProp("Tyqxh")).append("',");
+                strSql.append(qxbzgl.getProp("Tyqnum")).append("',");
+                strSql.append(qxbzgl.getProp("Tstime")).append("',");
+                strSql.append(qxbzgl.getProp("Tmeb")).append("',");
+                strSql.append(qxbzgl.getProp("Tmebdh")).append("')");
+
+                strSql.append("0").append("')");
+                log.info(strSql.toString());
+                transUtil.addSql(strSql.toString());
+            }
+
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return qxbzgl.getProp("fsr");
+    }
+
+		/*
+    public Query findQxbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from qxbzgl where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = 'all'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from qxbzgl where qxbzglid not in (select top ");
+            strSql.append(minRow).append(" qxbzglid from qxbzgl where jsr = 'all'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" order by qxbzglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append("all").append("' order by qxbzglid desc");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    */
+    
+    public Query findQxbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String id 		          = Tools.nvl((String)(String)body.get("id")            );//取得查询条件
+        String parameteName 	  = Tools.nvl((String)(String)body.get("parameteName")  );//取得查询条件
+        String parameteChName 	= Tools.nvl((String)(String)body.get("parameteChName"));//取得查询条件
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        */
+        StringBuffer strSql = null;
+        StringBuffer sbr_sql_con =null;
+        try
+        {
+            //创建查询条件sbr_sql_con
+        		sbr_sql_con = new StringBuffer();
+        		if(id != null && !id.equals(""))
+                {
+                    sbr_sql_con.append(" and id ='");
+                    sbr_sql_con.append(id).append("'");
+                }
+                if(parameteName != null && !parameteName.equals(""))
+                {
+                    sbr_sql_con.append(" and parameteName ='");
+                    sbr_sql_con.append(parameteName).append("'");
+                }
+                if(parameteChName != null && !parameteChName.equals(""))
+                {
+                    sbr_sql_con.append(" and parameteChName like '%");
+                    sbr_sql_con.append(parameteChName).append("%'");
+                }
+                log.info(sbr_sql_con.toString());     
+        		
+        		
+        		
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCParaCureStand where 1=1 ");
+                strSql.append(sbr_sql_con.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            
+            strSql = new StringBuffer();
+						strSql.append("select top ").append(queryCon.getRowsPerPage()).append(" * from TCParaCureStand where id not in ");
+						strSql.append("(select top ").append(minRow).append(" id from TCParaCureStand where 1=1 ").append(sbr_sql_con.toString()).append(" order by id asc ) ");
+						strSql.append(sbr_sql_con.toString());
+						strSql.append("  order by id asc "); 
+            
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    
+    public Query findQxbzglList_noPage(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap 	body = (HashMap)queryCon.getConditionBody();
+        String id 		= Tools.nvl((String)(String)body.get("id"));//取得查询条件
+        String Cname 	= Tools.nvl((String)(String)body.get("Cname"));//取得查询条件
+        String CMonitorStatus 	= Tools.nvl((String)(String)body.get("CMonitorStatus"));//取得查询条件
+        log.info("findQxbzglList_noPage==================================");
+        log.info("Cname=================================="+Cname);
+        log.info("queryCon.getTotalNum()=================================="+queryCon.getTotalNum());
+        /*
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));//取得查询条件1
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));//取得查询条件2
+        
+        */
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCParaCureStand where 1=1 ");
+                /*
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                */
+                if(id != null && !id.equals(""))
+                {
+                    strSql.append(" and id ='");
+                    strSql.append(id).append("'");
+                }
+                if(Cname != null && !Cname.equals(""))
+                {
+                    strSql.append(" and Cname ='");
+                    strSql.append(Cname).append("'");
+                }
+                if(CMonitorStatus != null && !CMonitorStatus.equals(""))
+                {
+                    strSql.append(" and CMonitorStatus ='");
+                    strSql.append(CMonitorStatus).append("'");
+                }
+                
+                log.info(strSql.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            
+            
+            strSql.append(" ");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+    
+    public Query findPersonalQxbzglList(Query queryCon)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String fsrqq = Tools.nvl((String)(String)body.get("fsrqq"));
+        String fsrqz = Tools.nvl((String)(String)body.get("fsrqz"));
+        String tzzt = Tools.nvl((String)(String)body.get("tzzt"));
+        String jsr = Tools.nvl((String)(String)body.get("jsr"));
+        StringBuffer strSql = null;
+        try
+        {
+						//取得总数,用于分页
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from TCParaCureStand where 1=1 ");
+                if(fsrqq != null && !fsrqq.equals(""))
+                {
+                    strSql.append(" and fsrq > '");
+                    strSql.append(fsrqq).append("'");
+                }
+                if(fsrqz != null && !fsrqz.equals(""))
+                {
+                    strSql.append(" and fsrq < '");
+                    strSql.append(fsrqz).append("'");
+                }
+                if(tzzt != null && !tzzt.equals(""))
+                {
+                    strSql.append(" and tzzt like '%");
+                    strSql.append(tzzt).append("%'");
+                }
+                strSql.append(" and jsr = '").append(jsr).append("'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+						
+						//取得一个页面的结果
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from qxbzgl where qxbzglid not in (select top ");
+            strSql.append(minRow).append(" qxbzglid from qxbzgl where jsr = '");
+            strSql.append(jsr).append("'");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            strSql.append(" order by qxbzglid desc) ");
+            if(fsrqq != null && !fsrqq.equals(""))
+            {
+                strSql.append(" and fsrq > '");
+                strSql.append(fsrqq).append("'");
+            }
+            if(fsrqz != null && !fsrqz.equals(""))
+            {
+                strSql.append(" and fsrq < '");
+                strSql.append(fsrqz).append("'");
+            }
+            if(tzzt != null && !tzzt.equals(""))
+            {
+                strSql.append(" and tzzt like '%");
+                strSql.append(tzzt).append("%'");
+            }
+            strSql.append(" and jsr = '");
+            strSql.append(jsr).append("' order by qxbzglid desc");
+						queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+						
+						//执行
+            crs = transUtil.getResultBySelect(strSql.toString());
+						
+						//设置到返回的查询条件中
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+    }
+
+    public Qxbzgl findQxbzglById(String qxbzglid)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        Qxbzgl qxbzgl = new Qxbzgl();
+        StringBuffer strSql = new StringBuffer("select * from TCParaCureStand where qxbzglid ='");
+        strSql.append(qxbzglid).append("'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs == null || crs.size() == 0)
+                throw new BussinessProcessException("\u8BE5\u901A\u77E5\u4E0D\u5B58\u5728\uFF01");
+            ResultSetMetaData md = crs.getMetaData();
+            int cols = md.getColumnCount();
+            if(crs.next())
+            {
+                qxbzgl.setQxbzglid(crs.getString("qxbzglid"));
+                for(int i = 1; i <= cols; i++)
+                    qxbzgl.setProp(md.getColumnName(i).toLowerCase(), Tools.nvl(crs.getString(i)));
+
+            }
+            strSql = new StringBuffer("update qxbzgl set remark='1' where qxbzglid=");
+            strSql.append("qxbzglid").append("");
+            transUtil.addSql(strSql.toString());
+            transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return qxbzgl;
+    }
+
+		
+		//修改对象
+    public String modifyQxbzgl(Qxbzgl qxbzgl)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+       	//parameteName parameteChName configYPerValue configYMinValue configYValueCount 
+        //参数名称 参数中文名称 Y轴单位间隔 Y轴最小单位 Y轴长度 
+        StringBuffer strSql = new StringBuffer("update TCParaCureStand set ");
+        strSql.append("parameteName='").append(qxbzgl.getProp("parameteName")).append("',");
+        strSql.append("parameteChName='").append(qxbzgl.getProp("parameteChName")).append("',");
+        strSql.append("configYPerValue='").append(qxbzgl.getProp("configYPerValue")).append("',");
+        strSql.append("configYMinValue='").append(qxbzgl.getProp("configYMinValue")).append("',");
+        strSql.append("configYValueCount='").append(qxbzgl.getProp("configYValueCount")).append("' where id = '");
+        strSql.append(qxbzgl.getQxbzglid()).append("'");
+        log.info(strSql.toString());
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return qxbzgl.getQxbzglid();
+    }
+    
+    
+
+    public String deleteQxbzgl(String qxbzglid)
+        throws BussinessProcessException
+    {
+        DBTrans transUtil = new DBTrans();
+        boolean success = false;
+        int int_qxbzglid = Integer.parseInt(qxbzglid);
+        StringBuffer strSql = new StringBuffer("delete from TCParaCureStand where id = ");
+        strSql.append(int_qxbzglid).append("");
+        try
+        {
+            transUtil.addSql(strSql.toString());
+            success = transUtil.executeSql();
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return qxbzglid;
+    }
+
+    public boolean hasNewQxbzgl(String username)
+        throws BussinessProcessException
+    {
+        DBTransUtil transUtil = new DBTransUtil();
+        CachedRowSet crs = null;
+        boolean success = false;
+        StringBuffer strSql = new StringBuffer("select qxbzglid from qxbzgl where jsr = '");
+        strSql.append(username).append("' and remark='0'");
+        try
+        {
+            crs = transUtil.getResultBySelect(strSql.toString());
+            if(crs != null && crs.size() > 0)
+                success = true;
+        }
+        catch(Exception fe)
+        {
+            throw new BussinessProcessException(fe.getMessage());
+        }
+        return success;
+    }
+}

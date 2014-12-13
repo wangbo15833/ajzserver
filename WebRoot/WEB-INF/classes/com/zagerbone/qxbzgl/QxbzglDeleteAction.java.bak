@@ -1,0 +1,52 @@
+package com.zagerbone.gzbzgl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.gzbzgl:
+//            GzbzglDAOFactory, GzbzglDAO
+
+public class GzbzglDeleteAction extends BaseActionSupport
+{
+
+    public GzbzglDeleteAction()
+    {
+    }
+
+    public EventResponse perform(Event evt)
+    {
+        EventResponse returnValue = new EventResponse();
+        GzbzglDAO dao = GzbzglDAOFactory.getDAO();
+        try
+        {
+            String gzbzglid = (String)processEvent(evt);
+            String id = dao.deleteGzbzgl(gzbzglid);
+            returnValue.setSuccessFlag(true);
+            returnValue.setBody(id);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode("601");
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+    public Object processEvent(Event evt)
+        throws BussinessProcessException
+    {
+        HashMap hashBody = evt.getBody();
+        String gzbzglid = (String)hashBody.get("id");
+        if(gzbzglid == null || gzbzglid.equals("")){
+            throw new BussinessProcessException("");
+        }
+        else{
+            return gzbzglid;
+        }
+    }
+}

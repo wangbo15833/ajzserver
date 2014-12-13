@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>  
+  <display-name>tjca</display-name>
+  
+  <filter>
+    <filter-name>HeadFilter</filter-name>
+    <display-name>Encoding Filter</display-name>
+    <description>first filter</description>
+    <filter-class>com.shenghao.arch.webcontroller.HeadFilter</filter-class>
+  </filter> 
+
+  <filter>
+    <filter-name>SaftyFilter</filter-name>
+    <display-name>Safty Filter</display-name>
+    <description>second filter</description>
+    <filter-class>com.shenghao.arch.webcontroller.SaftyFilter</filter-class>
+  </filter>
+  
+  <filter-mapping>
+    <filter-name>HeadFilter</filter-name>
+    <url-pattern>/MainServlet_sys</url-pattern>
+  </filter-mapping>
+	 
+	 <!--  
+  <filter-mapping>
+    <filter-name>SaftyFilter</filter-name>
+    <url-pattern>/MainServlet_sys</url-pattern>
+  </filter-mapping>
+  -->
+  <servlet>
+    <servlet-name>GlobalServlet</servlet-name>
+    <servlet-class>com.shenghao.arch.util.GlobalServlet</servlet-class>
+    <init-param>
+      <param-name>VERSION</param-name>
+      <param-value>alpha1.0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>CANWRITE</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>EMAILQUEUE</param-name>
+      <param-value>jms/BussinessQueue</param-value>
+    </init-param>
+    <init-param>
+      <param-name>EQCONNFACTORY</param-name>
+      <param-value>jms/QueueConnectionFactory</param-value>
+    </init-param>
+    <init-param>
+      <param-name>SHOP_CONTEXTROOT</param-name>
+      <param-value>http://127.0.0.1:60/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>MERCHANTID</param-name>
+      <param-value>1232132</param-value>
+    </init-param>
+    <init-param>
+      <param-name>MERURL</param-name>
+      <param-value>http://www.628.cn/ReceivePayServlet</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ICBCBANKCERTFILE</param-name>
+      <param-value>/admin.crt</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ICBCCERTFILE</param-name>
+      <param-value>/new.crt</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ICBCKEYFILE</param-name>
+      <param-value>/new.key</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ICBCKEYPASS</param-name>
+      <param-value>12345678</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ICBCURL</param-name>
+      <param-value>http://testmybank.icbc.com.cn/servlet/com.icbc.inbs.b2c.pay.B2cMerPayReqServlet</param-value>
+    </init-param>
+    <init-param>
+      <param-name>INTERFACETYPE</param-name>
+      <param-value>HS</param-value>
+    </init-param> 
+    <init-param>
+      <param-name>CMBURL</param-name>
+      <param-value>https://www.cmbchina.com/netpayment/BaseHttp.dll?TestPrePayC</param-value>
+    </init-param>
+    <init-param>
+      <param-name>CMBBRANCHID</param-name>
+      <param-value>022</param-value>
+    </init-param>
+    <init-param>
+      <param-name>CMBCONO</param-name>
+      <param-value>10001</param-value>
+    </init-param>
+    <init-param>
+      <param-name>CMBKEYFILE</param-name>
+      <param-value>c:\\public.key</param-value>
+    </init-param>
+    <init-param>
+      <param-name>CMBMERURL</param-name>
+      <param-value>http://www.628.cn/ReceivePayServlet</param-value>
+    </init-param>
+    <init-param>
+      <param-name>SMTPSERVER</param-name>
+      <param-value>smtp.1768.org</param-value>
+    </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>MainServlet_sys</servlet-name>
+    <servlet-class>com.shenghao.arch.webcontroller.MainServlet_sys</servlet-class>
+    <init-param>
+      <param-name>SYSTEMNAME</param-name>
+      <param-value>zagerbone</param-value>
+    </init-param>
+    <init-param>
+      <param-name>JNDI</param-name>
+      <!--<param-value>java:jdbc/oasys</param-value>-->
+      <!--<param-value>java:comp/env/jdbc/erpsys</param-value>-->
+
+      <param-value>connectionPool_tdjy</param-value>
+    </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  
+	<!--for start and init the time schedule-->
+	<listener>
+		<listener-class>com.timersch.StartListener</listener-class>
+	</listener>
+  
+  <servlet>
+    <servlet-name>ViewDispatchServlet</servlet-name>
+    <servlet-class>com.shenghao.arch.webcontroller.ViewDispatchServlet</servlet-class>
+    <init-param>
+      <param-name>viewmapsrc</param-name>
+      <param-value>viewmap.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>GLOBALCONTEXT</param-name>
+      <param-value></param-value>
+    </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  
+ <!--lee * snowcube-->
+  <servlet>
+    <servlet-name>Gentool</servlet-name>
+    <servlet-class>com.lee.gentools.Gentool</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>ViewDispatchServlet</servlet-name>
+    <url-pattern>/MainServlet_sys/Gentool</url-pattern>
+  </servlet-mapping>
+  
+ <!--lee * snowcube-->
+  <servlet>
+    <servlet-name>ExportExcelServlet</servlet-name>
+    <servlet-class>com.shenghao.arch.util.excel.ExportExcelServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>GlobalServlet</servlet-name>
+    <url-pattern>/GlobalServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MainServlet_sys</servlet-name>
+    <url-pattern>/MainServlet_sys</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ViewDispatchServlet</servlet-name>
+    <url-pattern>/ViewDispatchServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ExportExcelServlet</servlet-name>
+    <url-pattern>/ExportExcelServlet</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>/ftxh/login.jsp</welcome-file>
+  </welcome-file-list>
+  <!--
+  <taglib>
+    <taglib-uri>/WEB-INF/tld/app.tld</taglib-uri>
+    <taglib-location>/WEB-INF/tld/app.tld</taglib-location>
+  </taglib>
+  -->
+  
+<servlet> 
+	<servlet-name>ConnectionServlet</servlet-name>
+	<servlet-class>com.zagerbone.dbPool.ConnectionServlet</servlet-class>
+	<load-on-startup>1</load-on-startup>
+</servlet>
+<servlet-mapping>
+  <servlet-name>ConnectionServlet</servlet-name>
+  <url-pattern>/ConnectionPoolStatus</url-pattern>
+</servlet-mapping>
+<servlet> 
+	<servlet-name>Initonce</servlet-name>
+	<servlet-class>com.zagerbone.initonce.Initonce</servlet-class>
+	<load-on-startup>2</load-on-startup>
+</servlet>
+<servlet-mapping>
+  <servlet-name>Initonce</servlet-name>
+  <url-pattern>/Initonce</url-pattern>
+</servlet-mapping>
+<!--ico-->
+<mime-mapping> 
+<extension>ico</extension> 
+<mime-type>image/x-icon</mime-type> 
+</mime-mapping>
+<!--ico-->
+
+
+</web-app>

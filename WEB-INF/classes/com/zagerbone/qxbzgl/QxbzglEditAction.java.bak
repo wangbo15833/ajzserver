@@ -1,0 +1,75 @@
+package com.zagerbone.syclgl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.zagerbone.util.Query;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.syclgl:
+//            SyclglDAOFactory, SyclglDAO
+
+public class SyclglEditAction extends BaseActionSupport
+{
+
+    public SyclglEditAction()
+    {
+    }
+
+    public EventResponse perform(Event evt)
+    {
+				//定义数据访问对象,进行增删查改
+        SyclglDAO 			dao 				= SyclglDAOFactory.getDAO();
+				//定义事件响应对象,jsp页面要调用它
+        EventResponse 	returnValue = new EventResponse();
+        try
+        {
+						//检索出查询条件对象Query
+            Query 	queryCon = (Query)processEvent(evt);//获取查询条件
+						
+						//数据访问对象,进行查询操作,查询结果放在outQuery中
+            Query 	outQuery = dao.findSyclglList(queryCon);//调用查询语句进行查询
+						
+						//设置成功标志
+            returnValue.setSuccessFlag(true);
+						
+						//设置查询结果
+            returnValue.setBody(outQuery);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode("601");
+            returnValue.setErrorMessage(me.getMessage());
+        }
+				//返回事件对象
+        return returnValue;
+    }
+
+		//预处理翻页
+    public Object processEvent(Event evt) throws BussinessProcessException
+    {
+        HashMap hashBody = evt.getBody();
+        Query queryCondition = new Query();
+        String strPage 				= (String)hashBody.get("page");//获取当前页号
+        String strRowsperpage = (String)hashBody.get("rowsperpage");//获取每页多少行
+        String strTotal 			= (String)hashBody.get("total");//获取合计
+        String queryString 		= (String)hashBody.get("queryString");//获取查询字符串
+        queryString = "fid=" + evt.getFunctionID() + queryString;//查询字符串+功能id
+        //初始化分页数据，默认当前页号为1，默认每页15行，合计总数0
+        if(strPage == null || strPage.equals(""))
+            strPage = "1";
+        if(strRowsperpage == null || strRowsperpage.equals(""))
+            strRowsperpage = "15";
+        if(strTotal == null || strTotal.equals(""))
+            strTotal = "0";
+            
+        queryCondition.setCurrentPageNum(Integer.parseInt(strPage));
+        queryCondition.setRowsPerPage(Integer.parseInt(strRowsperpage));
+        queryCondition.setTotalNum(Integer.parseInt(strTotal));
+        queryCondition.setQueryString(queryString);
+        queryCondition.setConditionBody(hashBody);
+        return queryCondition;
+    }
+}

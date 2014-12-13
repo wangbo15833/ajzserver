@@ -1,0 +1,39 @@
+#jqnews
+{
+ overflow: hidden;
+ height: 380px; 
+ width: 100%;
+ border: solid 1px #ccc;
+ text-decoration:none;
+ font-size:14px;
+}
+
+#jqnews div
+{
+ display: block;
+ overflow: hidden;
+ background-color: #def;
+ height: 90px;
+ width: 100%;
+ margin: 5px;
+}
+
+#jqnewsVert
+{
+ overflow: hidden; height: 500px; width: 160px; border: solid 1px #000; margin:auto;
+}
+
+#jqnewsVert div
+{
+ display: block; overflow: hidden; background-color: #def; height: 118px; width: 150px; margin: 5px;
+}
+
+#jqnewsOriz
+{
+ border: solid 1px #000; height: 130px; width: 650px; overflow: hidden; margin:auto;
+}
+
+#jqnewsOriz div
+{
+ float:left; border: solid 1px #000; background: #def; height: 118px; width: 150px; margin: 5px; display:block;
+}

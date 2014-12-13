@@ -1,0 +1,1253 @@
+package com.zagerbone.user;
+
+import com.shenghao.arch.baseobject.*;
+import com.shenghao.arch.exception.*;
+import com.shenghao.arch.util.DBTransUtil;
+import com.shenghao.arch.util.Tools;
+import com.zagerbone.util.*;
+import sun.jdbc.rowset.*;
+import java.util.*;
+import java.sql.*;
+import java.io.FileOutputStream;
+import com.zagerbone.util.DBTrans;
+import com.zagerbone.util.Query;
+import	com.zagerbone.util.data.*;
+/*
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+/*
+//根据用户映射信息，查找用户的权限数组信息；
+	public ArrayList find_functionids(HashMap hp_user)
+
+
+
+*/
+
+public class UserDAOImpl extends BasicObject implements UserDAO
+{
+  DBTrans transUtil	= null;
+  
+  //用户注册
+  public String registUser(User user) throws BussinessProcessException
+  {
+    DBTrans 			transUtil = new DBTrans();
+    boolean 			success 	= false;
+    CachedRowSet 	crs 			= null;
+    String 				userTableName = (String)SysWorker.getAttribute("userName");
+    StringBuffer 	strSql1 	= new StringBuffer("");//判断是否有重名的用户
+    strSql1.append("select username from "+userTableName+" where username = '");
+    strSql1.append(user.getProp("username")).append("'");
+    log.info(strSql1.toString());
+    try
+    {
+      crs = transUtil.getResultBySelect(strSql1.toString());
+      if(crs==null||crs.size()==0){
+        log.info("crs is null!");
+      }
+      else{
+        throw new BussinessProcessException("该用户已存在,请重新输入用户名！");
+      }
+    }
+    catch(Exception e)
+    {
+      throw new BussinessProcessException(e.getMessage());
+    }
+
+    StringBuffer strSql = new StringBuffer("");//添加用户
+    //strSql.append("username, password, realname, company, address, email, telephone, addition, work_unit, work_unit_name, usertype, flag, regdate, ");
+    strSql.append("insert into "+userTableName+"(username,password,realname, company, address,email,telephone,usertype,flag,regdate,remark) values('");
+    strSql.append(user.getProp("username")).append("','");
+    strSql.append(user.getProp("password")).append("','");
+    strSql.append(user.getProp("realname")).append("','");
+    strSql.append(user.getProp("company")).append("','");
+    strSql.append(user.getProp("address")).append("','");
+    strSql.append(user.getProp("email")).append("','");
+    strSql.append(user.getProp("telephone")).append("','");
+    strSql.append(user.getProp("usertype")).append("','");
+    strSql.append(user.getProp("flag")).append("','");
+    strSql.append(user.getProp("regdate")).append("','");
+    strSql.append("待审批").append("',getDate(),'");
+    strSql.append(user.getProp("remark")).append("')");
+    log.info(strSql.toString());
+
+    try
+    {
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+
+    return user.getProp("username");
+  }
+
+  //查看用户列表
+  public Query findUserList(Query queryCon) throws BussinessProcessException
+  {
+    		String 				userTableName = (String)SysWorker.getAttribute("userName");
+		    StringBuffer 	strSql1 	= new StringBuffer("");
+		    
+    		DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String work_unit = Tools.nvl((String)body.get("work_unit"));
+        String username = Tools.nvl((String)body.get("username"));//查询条件
+        String realname = Tools.nvl((String)body.get("realname"));
+        String usertype = Tools.nvl((String)body.get("usertype"));
+        String userid = Tools.nvl((String)body.get("userid"));
+        StringBuffer strSql = null;
+        StringBuffer sbr_sql_con =null;
+        try
+        {
+            
+            //创建查询条件sbr_sql_con
+        		sbr_sql_con = new StringBuffer();
+        		if(work_unit != null && !work_unit.equals(""))
+            {
+                sbr_sql_con.append(" and work_unit like '%");
+                sbr_sql_con.append(work_unit).append("%'");
+            }
+            if(userid != null && !userid.equals(""))
+            {
+                sbr_sql_con.append(" and userid like '%");
+                sbr_sql_con.append(userid).append("%'");
+            }
+            if(realname != null && !realname.equals(""))
+            {
+                sbr_sql_con.append(" and realname like '%");
+                sbr_sql_con.append(realname).append("%'");
+            }
+            if(usertype != null && !usertype.equals(""))
+            {
+                sbr_sql_con.append(" and usertype like '%");
+                sbr_sql_con.append(usertype).append("%'");
+            }
+            if(username != null && !username.equals(""))
+            {
+                sbr_sql_con.append(" and username like '%");
+                sbr_sql_con.append(username).append("%'");
+            }
+            
+                
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from "+userTableName+" where 1=1 ");
+                strSql.append(sbr_sql_con.toString());
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            
+            strSql = new StringBuffer();
+						strSql.append("select top ").append(queryCon.getRowsPerPage()).append(" * from  "+userTableName+"  where id not in ");
+						strSql.append("(select top ").append(minRow).append(" id from  "+userTableName+"  where 1=1 ").append(sbr_sql_con.toString()).append(" order by flag asc ) ");
+						strSql.append(sbr_sql_con.toString());
+						strSql.append("  order by flag asc "); 
+            
+            
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+  }
+
+  //用户登陆
+  public String loginUser(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    StringBuffer 	strSql 				= new StringBuffer("");
+    String 				userTableName = (String)SysWorker.getAttribute("userName");
+    
+    String username = Tools.nvl(user.getProp("username"));
+    String password = Tools.nvl(user.getProp("password"));
+    
+    String userInitInuput = username+password;
+    if(userInitInuput.indexOf(" ( ") != -1){
+    	throw new BussinessProcessException("用户输入(不正常！");
+    }
+    else if(userInitInuput.indexOf(" )") != -1){
+    	throw new BussinessProcessException("用户输入)不正常！");
+    }
+    else if(userInitInuput.indexOf(" or ") != -1){
+    	throw new BussinessProcessException("用户输入or不正常！");
+    }
+    else if(userInitInuput.indexOf(" and ") != -1){
+    	throw new BussinessProcessException("用户输入and不正常！");
+    }
+    else if(userInitInuput.indexOf(" = ") != -1){
+    	throw new BussinessProcessException("用户输入=不正常！");
+    }
+    
+    strSql.append("select userid,password,flag,logintimes from "+userTableName+" where 1=1 ");
+    strSql.append(" and username = '").append(user.getProp("username")).append("'");
+    log.info(strSql.toString());
+		try
+    {
+      crs = transUtil.getResultBySelect(strSql.toString());
+      if (crs == null||crs.size()==0)
+      {
+        throw new BussinessProcessException("该用户不存在！");
+      }
+      if(crs.next())
+      {
+        user.setProp("userid",crs.getString("userid"));
+        String pwd = crs.getString("password");
+        String flag = Tools.nvl(crs.getString("flag"));
+        if (!flag.equals("正常"))
+        {
+          throw new BussinessProcessException("用户状态不正常！");
+        }
+        if (!pwd.equals(user.getProp("password")))
+        {
+          throw new BussinessProcessException("用户口令不正确！");
+        }
+        strSql = new StringBuffer("update "+userTableName+" set lastip='");
+        strSql.append(user.getProp("lastip")).append("',");
+        strSql.append("lastdate = getDate(),logintimes = logintimes+1 where userid = '");
+        strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+      }
+    }
+    catch(Exception fe)
+    {
+    	//试图从另外一张表登录
+      strSql = new StringBuffer("");
+	    strSql.append("select userid,password,flag,logintimes from all_userinfo where username = '");
+	    strSql.append(user.getProp("username")).append("'");
+	    log.info(strSql.toString());
+			try
+	    {
+	      crs = transUtil.getResultBySelect(strSql.toString());
+	      if (crs == null||crs.size()==0)
+	      {
+	        throw new BussinessProcessException("该用户不存在！");
+	      }
+	      if(crs.next())
+	      {
+	        user.setProp("userid",crs.getString("userid"));
+	        String pwd = crs.getString("password");
+	        String flag = Tools.nvl(crs.getString("flag"));
+	        if (!flag.equals("正常"))
+	        {
+	          throw new BussinessProcessException("用户状态不正常！");
+	        }
+	        if (!pwd.equals(user.getProp("password")))
+	        {
+	          throw new BussinessProcessException("用户口令不正确！");
+	        }
+	        strSql = new StringBuffer("update all_userinfo set lastip='");
+	        strSql.append(user.getProp("lastip")).append("',");
+	        strSql.append("lastdate = getDate(),logintimes = logintimes+1 where userid = '");
+	        strSql.append(user.getProp("userid")).append("'");
+	        log.info(strSql.toString());
+	
+	        transUtil.addSql(strSql.toString());
+	        success = transUtil.executeSql();
+	        if (!success)
+	        {
+	          throw new BussinessProcessException(transUtil.getErrorMessage());
+	        }
+	      }
+	   	}
+	   	catch(Exception fe_2)
+	    {
+	    	fe_2.printStackTrace();
+	      throw new BussinessProcessException(fe_2.getMessage());     
+		  }      
+	    
+	    //fe.printStackTrace();
+      //throw new BussinessProcessException(fe.getMessage());   
+    }
+    return user.getProp("userid");
+  }
+  
+	public User findUserById(String userid) throws BussinessProcessException{
+		HashMap 	hp_user = new HashMap();
+		User 			user 		= null;
+		try{
+			user 		= findUserById(userid, hp_user);
+		}catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+		return user;
+	}
+  
+  
+  //通过userid查看用户信息
+  public User findUserById(String userid, 	HashMap hp_user) throws BussinessProcessException{
+    DBTrans transUtil = new DBTrans();
+    CachedRowSet crs = null;
+    User 			user 		= new User();
+    if(hp_user == null){
+    	hp_user = new HashMap();
+		}
+		
+		
+    StringBuffer strSql = new StringBuffer("select * from "+SysWorker.getAttribute("userName")+" where userid = '");
+    strSql.append(userid).append("'");
+    log.info(strSql.toString());
+    try{
+	    crs = transUtil.getResultBySelect(strSql.toString());
+			if(crs==null||crs.size()==0)
+	    {
+	      throw new BussinessProcessException("该用户不存在！");
+	    }
+	  }catch(Exception ex){
+	  	strSql = new StringBuffer("select * from all_userinfo where userid = '");
+	  	strSql.append(userid).append("'");
+    	log.info(strSql.toString());
+		}
+    
+    
+    
+    try
+    {
+    	
+    	
+    	
+    	crs = transUtil.getResultBySelect(strSql.toString());
+			log.info("strSql.toString()=============================================================="+strSql.toString());
+      if(crs==null||crs.size()==0)
+      {
+        throw new BussinessProcessException("该用户不存在！");
+      }
+      
+      
+      
+      
+      //转换为hp_user
+      ResultSetMetaData 	md = crs.getMetaData();
+      int 	cols = md.getColumnCount();
+      if(crs.next())
+      {
+        for(int i=1; i<=cols; i++)
+        {
+          user.setProp(md.getColumnName(i).toLowerCase(),Tools.nvl(crs.getString(i)));
+          hp_user.put(md.getColumnName(i).toLowerCase(),Tools.nvl(crs.getString(i)));
+        }
+      }
+      
+      
+      /*
+      //生成权限列表
+      strSql = new StringBuffer("select * from v_user_function where userid = '");
+      strSql.append(userid).append("'");
+      log.info(strSql.toString());
+      crs = transUtil.getResultBySelect(strSql.toString());
+      if(crs==null||crs.size()==0)
+      {
+      }
+      else
+      {
+        //生成权限列表
+        HashMap privlist = new HashMap(1);
+        while(crs.next())
+        {
+          privlist.put(crs.getString("functionid"),crs.getString("functionname"));
+        }
+        user.setPrivlist(privlist);
+      }
+      */
+      
+      
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    finally{
+      try{crs.close();}catch(Exception fe){};
+    }
+		
+    return user;
+  }
+
+	public HashMap find_hp_user_ByByusername_password(String username, String password) throws BussinessProcessException
+	{
+			
+			//User 			user 		= new User();
+	    HashMap 	hp_user = new HashMap();
+	    try{ 
+		   	DBTransUtil 	transUtil = new DBTransUtil();
+				CachedRowSet 	crs 			= null;
+				StringBuffer 	strSql 		= null;
+				//strSql 		= new StringBuffer("select * from sys_term ");
+		    
+		    String 				userTableName = (String)SysWorker.getAttribute("userName");
+		    strSql = new StringBuffer();
+		    strSql.append("select * from ").append(userTableName).append(" where 1=1 ");
+		    strSql.append(" and username = '").append(username).append("' ");
+		    strSql.append(" and password = '").append(password).append("' ");
+		    log.info(strSql.toString());
+		    //取消sql注入
+		    if(username.indexOf("'") != -1 ){
+		    	throw new BussinessProcessException("存在危险字符！");
+		    }
+	    
+	      crs = transUtil.getResultBySelect(strSql.toString());
+	      if(crs==null||crs.size()==0){
+	        throw new BussinessProcessException("该用户不存在！");
+	      }
+	      ResultSetMetaData md = crs.getMetaData();
+	      int cols = md.getColumnCount();
+	      if(crs.next()){
+	    	  for(int i=1;i<=cols;i++){
+	    		  //user.setProp(md.getColumnName(i).toLowerCase(),Tools.nvl(crs.getString(i)));
+	    		  hp_user.put(md.getColumnName(i).toLowerCase(),Tools.nvl(crs.getString(i)));
+	    	  }
+	      }
+	    }
+	    catch(Exception fe){
+	      throw new BussinessProcessException(fe.getMessage());
+	    }
+	    //return user;
+	    return hp_user;
+	}
+	
+	//根据用户映射信息，查找用户的权限数组信息；
+	public ArrayList find_functionids(HashMap hp_user) throws BussinessProcessException
+	{
+		if(hp_user == null){
+			return null;
+		}
+		String 			sqlstr 					= null;
+		//查找所有的用户角色
+		ArrayList 	al_fid 					= new ArrayList();
+		String 			userroles 			= (String)hp_user.get("userroles");
+		String [] 	role_temp_array = userroles.split(",");
+		//遍历角色
+		for(int ik=0; ik<role_temp_array.length; ik++){
+			sqlstr = "select functionids from v_funrole where role_id='"+role_temp_array[ik]+"'";
+			CachedRowSet 	crs_rights = getDataBySQL(sqlstr);
+			String 				rights_temp = null;
+			try{
+				//获取角色中的权限,并遍历权限
+				while(crs_rights.next()){
+					rights_temp 								= crs_rights.getString("functionids");
+					String [] rights_temp_array = rights_temp.split(",");
+					//将焦色中的权限装入到数组中.
+					for(int jk=0; jk<rights_temp_array.length; jk++){
+						al_fid.add(rights_temp_array[jk]);
+					}
+				}
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		//log.info(""+al_fid);
+		//for(int jk=0; jk<al_fid.size(); jk++){
+		//	log.info("al_fid["+jk+"]="+al_fid.get(jk));
+		//}
+		return al_fid;
+	}
+
+  //用户审批
+  public String confirmUser(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+    		String 				userTableName = (String)SysWorker.getAttribute("userName");
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("update "+userTableName+" set flag='正常',confirmdate = getDate(),confirmpeople = '");
+        strSql.append(user.getProp("confirmpeople")).append("' where userid ='");
+        strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user.getProp("userid");
+  }
+
+  //用户禁用
+  public String forbidUser(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        String 				userTableName = (String)SysWorker.getAttribute("userName");
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("update "+userTableName+" set flag='已禁用',confirmdate = getDate(),confirmpeople = '");
+        strSql.append(user.getProp("confirmpeople")).append("' where userid ='");
+        strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user.getProp("userid");
+  }
+
+  //删除用户
+  public String deleteUser(String userid) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        String 				userTableName = (String)SysWorker.getAttribute("userName");
+        StringBuffer strSql = new StringBuffer("");
+        //strSql = new StringBuffer("delete from user_function where userid = '");
+        //strSql.append(userid).append("'");
+        //log.info(strSql.toString());
+        //transUtil.addSql(strSql.toString());
+        
+        strSql = new StringBuffer("delete from "+userTableName+" where userid ='");
+        strSql.append(userid).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return userid;
+  }
+
+  //赋权
+  public String addPrivilege(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    String userid = user.getProp("userid");
+    try
+    {
+      StringBuffer strSql = new StringBuffer("");
+       strSql = new StringBuffer("delete from user_function where userid ='");
+       strSql.append(userid).append("'");
+       log.info(strSql.toString());
+       transUtil.addSql(strSql.toString());
+       success = transUtil.executeSql();
+       if (!success)
+       {
+         throw new BussinessProcessException(transUtil.getErrorMessage());
+       }
+
+      HashMap hm = user.getPrivlist();
+        Iterator it = hm.keySet().iterator();
+        while(it.hasNext())
+        {
+          String functionid = (String)it.next();
+          String functionname = (String)hm.get(functionid);
+          strSql = new StringBuffer("");
+          strSql = new StringBuffer("insert into user_function(userid,functionid,functionname) values('");
+          strSql.append(userid).append("','");
+          strSql.append(functionid).append("','");
+          strSql.append(functionname).append("')");
+          log.info(strSql.toString());
+          transUtil.addSql(strSql.toString());
+        }
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return userid;
+  }
+  //查看权限
+  public String findPrivilege(String userid) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    StringBuffer privilege = new StringBuffer("");
+    try
+    {
+          StringBuffer strSql = new StringBuffer("");
+          strSql = new StringBuffer("select * from user_function where userid = '");
+          strSql.append(userid).append("'");
+          log.info(strSql.toString());
+          crs = transUtil.getResultBySelect(strSql.toString());
+        while(crs.next())
+        {
+                privilege.append(crs.getString("functionname")).append(",");
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return privilege.toString();
+
+  }
+
+  //修改密码
+  public String modifyPassword(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        String 				userTableName = (String)SysWorker.getAttribute("userName");
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("update "+userTableName+" set username = '");
+        strSql.append(user.getProp("username")).append("',password ='");
+        strSql.append(user.getProp("password")).append("' where userid ='");
+        strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user.getProp("userid");
+  }
+
+  //新增个人信息
+  public String createUserBasic(User user) throws BussinessProcessException
+  {
+    String 				userTableName = (String)SysWorker.getAttribute("userName");
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    StringBuffer strSql = new StringBuffer("");//添加个人信息
+    //strSql.append("insert into "+userTableName+"(userid,number,name,sex,origin,idcard,birthday,race,politic,zwzc,type,workgroup,tutor,zjkh,sysdz,sysdh,workunit,dwdh,entrancetime,
+    //graduatetime,telephone,email,dqdz,jtdz,fixphone,remark,flag,djr,djrq,state) values('");
+    //username realname company address email telephone addition
+    strSql.append("insert into "+userTableName+"(");
+    strSql.append("userid,username, password, realname, company, address, email, telephone, addition, work_unit, work_unit_name, usertype, flag, regdate, ");
+    strSql.append("confirmdate, confirmpeople, lastdate, logintimes, lastip, remark, userroles, worker_code, userrole_codes)");
+		strSql.append("values('");
+    strSql.append(Tools.nvl(user.getProp("userid"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("username"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("password"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("realname"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("company"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("address"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("email"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("telephone"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("addition"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("work_unit"))).append("','");
+   	strSql.append(Tools.nvl(user.getProp("work_unit_name"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("usertype"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("flag"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("regdate"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("confirmdate"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("confirmpeople"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("lastdate"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("graduatetime"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("logintimes"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("lastip"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("remark"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("userroles"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("worker_code"))).append("','");
+    strSql.append(Tools.nvl(user.getProp("userrole_codes"))).append("' )");
+    log.info(strSql.toString());
+    
+
+    try
+    {
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+        
+        
+      StringBuffer sbr_sql= new StringBuffer();
+	    sbr_sql.append("update "+userTableName+" set userid = id");
+	    transUtil.addSql(sbr_sql.toString());
+	    success = transUtil.executeSql();  
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    
+
+    return user.getProp("userid");
+  }
+  
+  
+
+  //查看个人信息列表
+  public Query findUserBasicManageList(Query queryCon) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String name = Tools.nvl((String)body.get("name"));
+        String workgroup = Tools.nvl((String)body.get("workgroup"));
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from user_basic where 1=1 ");
+                if(name != null && !name.equals(""))
+                {
+                    strSql.append(" and name like '%");
+                    strSql.append(name).append("%'");
+                }
+                if(workgroup != null && !workgroup.equals(""))
+                {
+                    strSql.append(" and workgroup like '%");
+                    strSql.append(workgroup).append("%'");
+                }
+                strSql.append(" and state = '1'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from user_basic where userid not in (select top ");
+            strSql.append(minRow).append(" userid from user_basic where state = '1'");
+            if(name != null && !name.equals(""))
+            {
+              strSql.append(" and name like '%");
+              strSql.append(name).append("%'");
+            }
+            if(workgroup != null && !workgroup.equals(""))
+            {
+              strSql.append(" and workgroup like '%");
+              strSql.append(workgroup).append("%'");
+            }
+
+            strSql.append(" order by flag asc) ");
+            if(name != null && !name.equals(""))
+            {
+              strSql.append(" and name like '%");
+              strSql.append(name).append("%'");
+            }
+            if(workgroup != null && !workgroup.equals(""))
+            {
+              strSql.append(" and workgroup like '%");
+              strSql.append(workgroup).append("%'");
+            }
+            strSql.append(" and state = '1' order by flag asc");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+  }
+
+  //查看个人信息列表
+  public Query findUserBasicList(Query queryCon) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+        CachedRowSet crs = null;
+        HashMap body = (HashMap)queryCon.getConditionBody();
+        String name = Tools.nvl((String)body.get("name"));
+        String workgroup = Tools.nvl((String)body.get("workgroup"));
+        StringBuffer strSql = null;
+        try
+        {
+            if(queryCon.getTotalNum() == 0)
+            {
+                strSql = new StringBuffer("select * from user_basic where flag='正常' ");
+                if(name != null && !name.equals(""))
+                {
+                    strSql.append(" and name like '%");
+                    strSql.append(name).append("%'");
+                }
+                if(workgroup != null && !workgroup.equals(""))
+                {
+                    strSql.append(" and workgroup like '%");
+                    strSql.append(workgroup).append("%'");
+                }
+                strSql.append(" and state = '1'");
+                queryCon.setTotalNum(transUtil.getRecNumBySelect(strSql.toString()));
+            }
+            if(queryCon.getCurrentPageNum() <= 0)
+                queryCon.setCurrentPageNum(1);
+            int minRow = queryCon.getRowsPerPage() * (queryCon.getCurrentPageNum() - 1);
+            strSql = new StringBuffer("select top ");
+            strSql.append(queryCon.getRowsPerPage());
+            strSql.append(" * from user_basic where userid not in (select top ");
+            strSql.append(minRow).append(" userid from user_basic where flag='正常' and state='1'");
+            if(name != null && !name.equals(""))
+            {
+              strSql.append(" and name like '%");
+              strSql.append(name).append("%'");
+            }
+                if(workgroup != null && !workgroup.equals(""))
+                {
+                  strSql.append(" and workgroup like '%");
+                  strSql.append(workgroup).append("%'");
+                }
+
+            strSql.append(" order by flag,name) ");
+            if(name != null && !name.equals(""))
+            {
+              strSql.append(" and name like '%");
+              strSql.append(name).append("%'");
+            }
+            if(workgroup != null && !workgroup.equals(""))
+            {
+              strSql.append(" and workgroup like '%");
+              strSql.append(workgroup).append("%'");
+            }
+
+            strSql.append(" and flag='正常'and state='1' order by flag,name");
+            queryCon.setSql(strSql.toString());
+            log.info(strSql.toString());
+            crs = transUtil.getResultBySelect(strSql.toString());
+            queryCon.setConditionBody(crs);
+        }
+        catch(Exception e)
+        {
+            throw new BussinessProcessException(e.getMessage());
+        }
+        return queryCon;
+  }
+
+  //查看个人详细信息
+  public User findUserBasicById(String userid) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    User user = new User();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("select * from user_basic where userid ='");
+        strSql.append(userid).append("' and state = '1'");
+        log.info(strSql.toString());
+        crs = transUtil.getResultBySelect(strSql.toString());
+        if(crs==null||crs.size()==0)
+        {
+          throw new BussinessProcessException("您还没有填写个人信息,请到成员管理中填写个人信息！");
+        }
+        ResultSetMetaData md = crs.getMetaData();
+      int cols = md.getColumnCount();
+      if(crs.next())
+      {
+        for(int i=1; i<=cols; i++)
+        {
+          user.setProp(md.getColumnName(i).toLowerCase(),Tools.nvl(crs.getString(i)));
+        }
+      }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user;
+  }
+
+  //审批个人信息
+  public String confirmUserBasic(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("update userinfo_tgy set flag='正常',confirmdate = getDate(),confirmpeople = '");
+        strSql.append(user.getProp("confirmpeople")).append("' where userid ='");
+        strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user.getProp("userid");
+  }
+
+
+  //修改个人信息
+  public String modifyUserBasic(User user) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        //id, userid, username, password, work_unit, work_unit_name, realname, usertype, email, flag, regdate, confirmdate, confirmpeople, lastdate,
+        //username realname company address email telephone addition
+				String 				userTableName = (String)SysWorker.getAttribute("userName");
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("update "+userTableName +" set ");
+        strSql.append("username ='"    ).append(user.getProp("username") ).append("',");
+        strSql.append("realname ='"    ).append(user.getProp("realname") ).append("',");
+        strSql.append("company ='"     ).append(user.getProp("company")  ).append("',");
+        strSql.append("address ='"     ).append(user.getProp("address")  ).append("',");
+        strSql.append("email ='"       ).append(user.getProp("email")    ).append("',");
+        strSql.append("telephone ='"   ).append(user.getProp("telephone")).append("',");
+        strSql.append("userroles ='"    ).append(user.getProp("userroles") ).append("'");
+        //strSql.append("usertype ='").append(user.getProp("usertype")).append("' where userid ='");
+        strSql.append("where userid ='").append(user.getProp("userid")  ).append("'");
+        
+        //strSql.append(user.getProp("userid")).append("'");
+        log.info(strSql.toString());
+        transUtil.addSql(strSql.toString());
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return user.getProp("userid");
+  }
+  //将成员变为校友
+  public String modifyUserToFriend(String userid,String djr) throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    boolean success = false;
+    CachedRowSet crs = null;
+    try
+    {
+        StringBuffer strSql = new StringBuffer("");
+        strSql = new StringBuffer("select * from  user_basic where userid ='");
+        strSql.append(userid).append("'");
+        log.info(strSql.toString());
+        crs = transUtil.getResultBySelect(strSql.toString());
+        if (crs==null||crs.size()<=0)
+        {
+          throw new BussinessProcessException("没有该成员记录！");
+        }
+        else
+        {
+          crs.next();
+          strSql = new StringBuffer("delete from user_basic where userid ='");
+          strSql.append(userid).append("'");
+          log.info(strSql.toString());
+          transUtil.addSql(strSql.toString());
+          strSql = new StringBuffer("insert into schoolmate(name,sex,origin,gradutetime,education,tutor,telephone,email,flag,djr,djrq) values('");
+          strSql.append(crs.getString("name")).append("','");
+          strSql.append(crs.getString("sex")).append("','");
+          strSql.append(crs.getString("origin")).append("','");
+          strSql.append(crs.getString("graduatetime")).append("','");
+          strSql.append(crs.getString("type")).append("','");
+          strSql.append(crs.getString("tutor")).append("','");
+          strSql.append(crs.getString("fixphone")).append("','");
+          strSql.append(crs.getString("email")).append("','");
+          strSql.append("待审批").append("','");
+          strSql.append(djr).append("',");
+          strSql.append("getDate()").append(")");
+          log.info(strSql.toString());
+          transUtil.addSql(strSql.toString());
+        }
+        success = transUtil.executeSql();
+        if (!success)
+        {
+          throw new BussinessProcessException(transUtil.getErrorMessage());
+        }
+    }
+    catch(Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+    return userid;
+  }
+  
+   public String createUserBasicExcel() throws BussinessProcessException
+   {
+   	return null;
+  }
+   
+  /* 
+  //成员导出
+  public String createUserBasicExcel() throws BussinessProcessException
+  {
+    DBTrans transUtil = new DBTrans();
+    CachedRowSet crs = null;
+    try
+    {
+      String strSql = "select number,name,sex,origin,idcard,birthday,race,politic,zwzc,type,workgroup,tutor,zjkh,sysdz,sysdh,workunit,dwdh,entrancetime,graduatetime,telephone,dqdz,jtdz,email,fixphone,remark from user_basic";
+      log.info(strSql);
+      crs = transUtil.getResultBySelect(strSql);
+      if(crs==null||crs.size()==0)
+      {
+        throw new BussinessProcessException("没有成员记录！");
+      }
+    }
+    catch (Exception fe)
+    {
+      throw new BussinessProcessException(fe.getMessage());
+    }
+
+    try{
+      // 创建新的Excel 工作簿
+      HSSFWorkbook workbook = new HSSFWorkbook();
+      // 在Excel工作簿中建一工作表,其名为缺省值
+      HSSFSheet sheet = workbook.createSheet("成员");
+      HSSFRow row;
+      HSSFCell cell;
+      //创建字体,设置其为红色、粗体：
+      HSSFFont font = workbook.createFont();
+      font.setColor(HSSFFont.COLOR_NORMAL);
+      font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+      //创建格式
+      HSSFCellStyle cellStyle = workbook.createCellStyle();
+      cellStyle.setFont(font);
+      //应用格式
+      row = sheet.createRow( (short) 0);
+      cell = row.createCell( (short) 0);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("序号");
+      cell = row.createCell( (short) 1);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("学号");
+      cell = row.createCell( (short) 2);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("姓名");
+      cell = row.createCell( (short) 3);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("性别");
+      cell = row.createCell( (short) 4);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("籍贯");
+      cell = row.createCell( (short) 5);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("身份证号");
+      cell = row.createCell( (short) 6);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("出生日期");
+      cell = row.createCell( (short) 7);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("民族");
+      cell = row.createCell( (short) 8);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("政治面貌");
+      cell = row.createCell( (short) 9);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("职务职称");
+      cell = row.createCell( (short) 10);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("身份类别");
+      cell = row.createCell( (short) 11);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("研究方向(或部门)");
+      cell = row.createCell( (short) 12);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("导师");
+      cell = row.createCell( (short) 13);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("资金卡号(或工资号)");
+      cell = row.createCell( (short) 14);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("实验室地址");
+      cell = row.createCell( (short) 15);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("实验室电话");
+      cell = row.createCell( (short) 16);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("工作单位");
+      cell = row.createCell( (short) 17);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("单位电话");
+      cell = row.createCell( (short) 18);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("入学时间");
+      cell = row.createCell( (short) 19);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("毕业时间");
+      cell = row.createCell( (short) 20);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("当前电话(或手机)");
+      cell = row.createCell( (short) 21);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("当前住址");
+      cell = row.createCell( (short) 22);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("家庭地址");
+      cell = row.createCell( (short) 23);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("电子信箱");
+      cell = row.createCell( (short) 24);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("家永久联系电话庭地址");
+      cell = row.createCell( (short) 25);
+      cell.setCellStyle(cellStyle);
+      cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+      ////cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+      cell.setCellValue("备注");
+
+      for (int i = 1; i < crs.size()+1; i++) {
+        crs.next();
+        // 在索引i的位置创建行（最顶端的行）
+        row = sheet.createRow( (short) i);
+        cell = row.createCell( (short) 0);
+        cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+        //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+        cell.setCellValue(Integer.toString(i));
+        for (int j = 1; j < crs.getMetaData().getColumnCount()+1; j++) {
+          //在索引j的位置创建单元格（左上端）
+          cell = row.createCell( (short) j);
+          // 定义单元格为字符串类型
+          cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+          //设置cell编码解决中文高位字节截断
+          //cell.setEncoding(HSSFCell.ENCODING_UTF_16);
+          // 在单元格中输入一些内容
+          cell.setCellValue(Tools.nvl(String.valueOf(crs.getObject(j)).trim()));
+
+        }
+      }
+      String filename = "F:\\jboss-4.0.2_2\\server\\default\\deploy\\oasys.war\\upload\\userbasic\\userbasic.xls";
+      //String filename = "D:\\jboss-4.0.2\\server\\default\\deploy\\oasys.war\\upload\\userbasic\\userbasic.xls";
+      // 新建一输出文件流
+      FileOutputStream fO = new FileOutputStream(filename);
+      // 把相应的Excel 工作簿存盘
+      workbook.write(fO);
+      fO.flush();
+      // 操作结束,关闭文件
+      fO.close();
+      log.info("fo.close()");
+      return "paper.xls";
+    }catch(Exception e){
+      throw new BussinessProcessException(e.getMessage());
+    }
+
+  }
+  */
+  public CachedRowSet getDataBySQL( String strSql) throws BussinessProcessException{
+		return findBySQL(transUtil, strSql);
+	}
+	public CachedRowSet findBySQL(DBTrans transUtil, String strSql) throws BussinessProcessException{
+			if(transUtil == null){
+				//log.info("No Connection!");
+				transUtil = new DBTrans();
+			} 
+	    CachedRowSet 	crs = null;
+	    //log.info(strSql);
+	    try{
+	    	crs = transUtil.getResultBySelect(strSql);
+        if(crs == null){
+        	throw new BussinessProcessException("没有查到结果！");
+        }
+	    }catch(Exception fe){
+	    	fe.printStackTrace();
+	      throw new BussinessProcessException(fe.getMessage());
+	    }
+	    return crs;
+	}
+	
+}

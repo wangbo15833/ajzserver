@@ -1,0 +1,94 @@
+package com.zagerbone.sys_display.servlet;
+import org.apache.log4j.*;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import sun.jdbc.rowset.CachedRowSet;
+import com.zagerbone.event.EventResponse;
+import com.zagerbone.exception.BussinessProcessException;
+import com.zagerbone.util.Query;
+import com.zagerbone.util.Tools;
+import com.zagerbone.util.*;
+import com.zagerbone.util.SysTrace;
+import com.zagerbone.util.DBTrans;
+import com.zagerbone.util.GeneralObject;
+import com.zagerbone.util.MyServlet_queryCon;
+import com.zagerbone.sys_display.data.*;
+import com.zagerbone.sys_display.dao.*;
+
+
+public class Sys_displayFindListAction extends HttpServlet{
+	public void service(HttpServletRequest request, HttpServletResponse response)
+		throws java.io.IOException, ServletException {
+		Logger 					log 				= Logger.getLogger(SysTrace.DBLOGGER);
+		EventResponse 	returnValue = new EventResponse();
+		returnValue.setFunctionId("FIIP000.000.003.02");
+		log.info("ActionName:"+returnValue.getFunctionId());
+		String 	jndi 		= "";
+		DBTrans dbTrans = new DBTrans(jndi);
+		
+		String dir = Tools.nvl(request.getParameter("dir"));
+		if(dir.equals("")){
+			dir = "sys_display";
+		}
+		String fileName = Tools.nvl(request.getParameter("fileName"));
+		if(fileName.equals("")){
+			fileName = "sys_display_list.jsp";
+		}
+		try{
+			dbTrans.beginTransaction();
+			returnValue.isSafe(request);
+			//returnValue.isRight(request);
+			String 					tableName_dataArray = Tools.nvl(request.getParameter("tableName_dataArray"));
+			GeneralDataArray 	Sys_displayDATA = Sys_displayDAOFactory.getDAO(dbTrans).getDataArrayView(tableName_dataArray);
+									
+			//Query 		queryCon 					= new Query();
+			//new MyServlet_queryCon(Sys_displayDATA.col_queryArray, queryCon, request);
+			ServletQueryCon 		servletQueryCon = new ServletQueryCon(Sys_displayDATA, request);
+			Query 							queryCon 				= servletQueryCon.getQuery();
+			servletQueryCon.setLikeQuery("displayName");
+			servletQueryCon.setLikeQuery("displayDescription");
+			
+			
+			CachedRowSet 		crs 				= Sys_displayDAOFactory.getDAO(dbTrans).findView(queryCon);
+			CachedRowSet 		crs_desc 		= Sys_displayDAOFactory.getDAO(dbTrans).findView(queryCon);
+			dbTrans.commitTransaction();
+			
+			request.setAttribute("Sys_displayDATA",	Sys_displayDATA);
+			request.setAttribute("crs", crs);
+			request.setAttribute("crs_desc",	crs_desc);
+			request.setAttribute("queryCon", queryCon);
+			
+			
+			StringBuffer sbr = new StringBuffer();
+			sbr.append(ListFrameTools.listContentTable_ALL_onceforALL(
+				"listframe",  "editframe", "../MainServlet/FIIP000.000.003.02", 
+				queryCon,	
+				new SysCSS( "248", "500%", "editSubmit_button();"),
+				crs, crs_desc,
+				Sys_displayDATA.col_arrayHead , 
+				Sys_displayDATA.col_array,
+				Sys_displayDATA.col_arrayDataType  )
+			);
+			request.setAttribute("listContent",	sbr.toString());
+			
+				
+			returnValue.setSuccessFlag(true);
+		}catch(Exception be ){
+			be.printStackTrace();
+			returnValue.setSuccessFlag(false);
+      returnValue.setErrorMessage(Tools.nvl(be.getMessage()).replace('\n', ' '));
+      dbTrans.rollbackTransaction();
+		}
+		request.setAttribute("result",returnValue);
+		if(returnValue.isSuccessFlag()){
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/"+fileName)).forward(request, response);
+		}else{
+			getServletContext().getRequestDispatcher(response.encodeURL("/"+dir+"/page_control.jsp")).forward(request, response);
+		}
+	}
+}

@@ -1,0 +1,51 @@
+body {
+	margin: 0px; text-align: center; font-family: Arial; font-size: 12px;
+}
+#flash_show_out {
+	width: 275px; height: 188px; position: relative;
+}
+#flash_show {
+	
+}
+#flash_img {
+	border: 1px solid rgb(0, 0, 0); width: 275px; height: 188px; overflow: hidden; filter: progid:DXImageTransform.Microsoft.Fade(Overlap=1.00);
+}
+#flash_btn {
+	top: 170px; width: 80px; right: 0px; position: absolute; z-index: 202;
+}
+#flash_btn div {
+	margin: 5px 2px; float: left;
+}
+#flash_btn div a {
+	background: rgb(255, 255, 255); border: 1px solid rgb(0, 0, 0); width: 7px; height: 7px; overflow: hidden; text-decoration: none; display: block;
+}
+#flash_btn div a:hover {
+	background: rgb(11, 182, 206); display: block;
+}
+#flash_show_ctl {
+	left: 1px; top: 160px; width: 275px; height: 30px; border-top-color: rgb(0, 0, 0); border-top-width: 1px; border-top-style: solid; position: absolute; z-index: 20;
+}
+#flashtrans {
+	background: rgb(255, 255, 255); left: 1px; top: 160px; width: 275px; height: 30px; filter: Alpha(opacity=70); position: absolute; z-index: 2; opacity: 0.7; moz-opacity: .7;
+}
+#flash_show_ctl_msg {
+	width: 274px; overflow: hidden; float: left; filter: progid:DXImageTransform.Microsoft.Fade(Overlap=1.00);
+}
+#flash_show_ctl a {
+	font: bold 13px/28px Arial, "????"; color: rgb(0, 0, 0); text-decoration: none; font-size-adjust: none; font-stretch: normal;
+}
+#flash_show_ctl a:hover {
+	color: rgb(51, 0, 153); text-decoration: none;
+}
+#flash_show_ctl_tuber {
+	left: 305px; top: -17px; position: relative; z-index: 100;
+}
+#flash_show_ctl_arrow {
+	margin-right: 5px;
+}
+#img_prev_btn {
+	height: 12px !important; color: rgb(0, 0, 0); line-height: 10px; font-size: 12px;
+}
+#img_next_btn {
+	height: 12px !important; color: rgb(0, 0, 0); line-height: 10px; font-size: 12px;
+}

@@ -1,0 +1,82 @@
+package com.zagerbone.gzbzgl;
+
+import java.util.HashMap;
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import com.zagerbone.util.Tools;
+
+// Referenced classes of package com.zagerbone.gzbzgl:
+//            Gzbzgl, GzbzglDAOFactory, GzbzglDAO
+
+public class GzbzglModifyAction extends BaseActionSupport
+{
+
+    public GzbzglModifyAction()
+    {
+		
+
+    }
+
+    public EventResponse perform(Event evt)
+    {
+        EventResponse returnValue = new EventResponse();
+        GzbzglDAO dao = GzbzglDAOFactory.getDAO();
+        try
+        {
+            Gzbzgl gzbzgl = (Gzbzgl)processEvent(evt);//获取对象
+            String gzbzglid = dao.modifyGzbzgl(gzbzgl);//修改对象
+            returnValue.setSuccessFlag(true);
+            returnValue.setBody(gzbzglid);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode(evt.getFunctionID());
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+		//生成一个对象,对象在hashBody中，需要全部取出来，hashBody是从框架中传过来的
+    public Object processEvent(Event evt)
+        throws BussinessProcessException
+    {
+        Gzbzgl gzbzgl = new Gzbzgl();
+        HashMap hashBody = evt.getBody();
+        gzbzgl.setGzbzglid((String)hashBody.get("id"));
+       	//gzbzgl.setProp("dataOperman", evt.getRealname());//设定修改人名
+        
+        //设置其他修改人
+        gzbzgl.setProp("tp_faultcode", 	Tools.nvl( (String)hashBody.get("tp_faultcode")) );
+        gzbzgl.setProp("tp_faultname", 	Tools.nvl( (String)hashBody.get("tp_faultname")) );
+        gzbzgl.setProp("qwbs", 					Tools.nvl( (String)hashBody.get("qwbs"))         );
+        gzbzgl.setProp("qwtime",  			Tools.nvl( (String)hashBody.get("qwtime")) 			 );
+        gzbzgl.setProp("ybbs", 	        Tools.nvl( (String)hashBody.get("ybbs")) );
+        gzbzgl.setProp("ybtime", 	      Tools.nvl( (String)hashBody.get("ybtime")) );
+        gzbzgl.setProp("zdbs", 					Tools.nvl( (String)hashBody.get("zdbs"))         );
+        gzbzgl.setProp("zdtime",  			Tools.nvl( (String)hashBody.get("zdtime")) 			 );
+        gzbzgl.setProp("add1",  			  Tools.nvl( (String)hashBody.get("add1")) 			 ); 
+        gzbzgl.setProp("add2", 	        Tools.nvl( (String)hashBody.get("add2")) );
+        gzbzgl.setProp("add3", 	        Tools.nvl( (String)hashBody.get("add3")) );
+        gzbzgl.setProp("add4", 					Tools.nvl( (String)hashBody.get("add4"))         );
+        gzbzgl.setProp("add5",  			  Tools.nvl( (String)hashBody.get("add5")) 			 );
+      
+        /*
+        String CMonitorStatus = com.zagerbone.util.Tools.nvl((String)hashBody.get("CMonitorStatus"));
+        if(CMonitorStatus.equals("取消")){
+        	CMonitorStatus = "0";
+        }
+        gzbzgl.setProp("CMonitorStatus", CMonitorStatus);
+        */
+        if      (gzbzgl.getProp("tp_faultcode").equals("")){ throw new BussinessProcessException("tp_faultcode不能为空"); }
+        else if (gzbzgl.getProp("tp_faultname").equals("")){ throw new BussinessProcessException(""); 										}
+        else{
+            return gzbzgl;
+        }
+        
+        //return gzbzgl;
+    }
+}

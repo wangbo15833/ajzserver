@@ -1,0 +1,76 @@
+package com.zagerbone.qxbzgl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.qxbzgl:
+//            Qxbzgl, QxbzglDAOFactory, QxbzglDAO
+
+public class QxbzglCreatAction extends BaseActionSupport
+{
+
+    public QxbzglCreatAction()
+    {
+    }
+
+    public EventResponse perform(Event evt)
+    {
+        EventResponse 	returnValue = new EventResponse();
+        QxbzglDAO 			dao 				= QxbzglDAOFactory.getDAO();
+        String fsr = "";
+        try
+        {
+            log.info("hhhhhhhhhhhhhhhhhhhhhhhhh");
+            Qxbzgl 		qxbzgl = (Qxbzgl)processEvent(evt);//获取对象
+            fsr = dao.createQxbzgl(qxbzgl);//创建对象
+            returnValue.setSuccessFlag(true);//设置成功标志
+            returnValue.setBody(fsr);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode("601");
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+		//预处理，生成对象
+    public Object processEvent(Event evt)throws BussinessProcessException
+    {
+        Qxbzgl qxbzgl = new Qxbzgl();//生成测试车辆对象
+        HashMap hashBody = evt.getBody();
+        //parameteName parameteChName configYPerValue configYMinValue configYValueCount 
+        //参数名称 参数中文名称 Y轴单位间隔 Y轴最小单位 Y轴长度 
+        qxbzgl.setProp("parameteName", 		(String)hashBody.get("parameteName"));//获取车辆名称
+        qxbzgl.setProp("parameteChName", 	(String)hashBody.get("parameteChName"));//获取车辆型号
+        qxbzgl.setProp("configYPerValue", (String)hashBody.get("configYPerValue"));//获取车辆出厂编号
+        qxbzgl.setProp("configYMinValue", (String)hashBody.get("configYMinValue"));//获取车辆制造单位
+        qxbzgl.setProp("configYValueCount",(String)hashBody.get("configYValueCount"));//获取抽检日期
+        log.info(hashBody);
+        
+        
+        //定义不为空的属性
+        if(qxbzgl.getProp("parameteName") == null || qxbzgl.getProp("parameteName").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else if(qxbzgl.getProp("configYPerValue") == null || qxbzgl.getProp("configYPerValue").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else if(qxbzgl.getProp("configYMinValue") == null || qxbzgl.getProp("configYMinValue").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else if(qxbzgl.getProp("configYValueCount") == null || qxbzgl.getProp("configYValueCount").equals("")){
+            throw new BussinessProcessException("");
+        }
+        else{
+           return qxbzgl;
+        }
+        
+        return qxbzgl;
+    }
+}

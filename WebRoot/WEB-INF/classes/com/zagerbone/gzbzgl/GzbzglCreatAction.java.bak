@@ -1,0 +1,80 @@
+package com.zagerbone.gzbzgl;
+
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import java.util.HashMap;
+
+// Referenced classes of package com.zagerbone.gzbzgl:
+//            Gzbzgl, GzbzglDAOFactory, GzbzglDAO
+
+public class GzbzglCreatAction extends BaseActionSupport
+{
+
+    public GzbzglCreatAction()
+    {
+    }
+
+    public EventResponse perform(Event evt)
+    {
+        EventResponse 	returnValue = new EventResponse();
+        GzbzglDAO 			dao 				= GzbzglDAOFactory.getDAO();
+        String fsr = "";
+        try
+        {
+            log.info("hhhhhhhhhhhhhhhhhhhhhhhhh");
+            Gzbzgl 		gzbzgl = (Gzbzgl)processEvent(evt);//获取对象
+            fsr = dao.createGzbzgl(gzbzgl);//创建对象
+            returnValue.setSuccessFlag(true);//设置成功标志
+            returnValue.setBody(fsr);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode("601");
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+		//预处理，生成对象
+    public Object processEvent(Event evt)throws BussinessProcessException
+    {
+        Gzbzgl gzbzgl = new Gzbzgl();//生成故障标准对象
+        HashMap hashBody = evt.getBody();
+        //tp_faultcode,tp_faultname,qwbs,qwtime,ybbs,ybtime,zdbs,zdtime,add1,add2,add3,add4,add5
+        gzbzgl.setProp("tp_faultcode", 		(String)hashBody.get("tp_faultcode"));//获取故障代码
+        gzbzgl.setProp("tp_faultname", 		(String)hashBody.get("tp_faultname"));//获取故障名称
+        gzbzgl.setProp("qwbs", 		        (String)hashBody.get("qwbs"));//获取轻微标识
+        gzbzgl.setProp("qwtime",        	(String)hashBody.get("qwtime"));//获取轻微时间
+        gzbzgl.setProp("ybbs", 		        (String)hashBody.get("ybbs"));//获取一般标识
+        gzbzgl.setProp("ybtime", 	        (String)hashBody.get("ybtime"));//获取一般时间
+        gzbzgl.setProp("zdbs", 	          (String)hashBody.get("zdbs"));//获取重大标识
+        gzbzgl.setProp("zdtime", 			    (String)hashBody.get("zdtime"));//获取重大时间
+        gzbzgl.setProp("add1", 		        (String)hashBody.get("add1"));//获取故障备注信息
+        gzbzgl.setProp("add2", 		        (String)hashBody.get("add2"));
+        gzbzgl.setProp("add3", 		        (String)hashBody.get("add3"));
+        gzbzgl.setProp("add4", 		        (String)hashBody.get("add4"));
+        gzbzgl.setProp("add5", 			      (String)hashBody.get("add5"));
+        //gzbzgl.setProp("Tmebdh", 		(String)hashBody.get("Tmebdh"));
+        
+        log.info(hashBody);
+        
+        
+        if(gzbzgl.getProp("tp_faultcode") == null || gzbzgl.getProp("tp_faultcode").equals("")){
+            throw new BussinessProcessException("故障代码不能为空!");
+        }
+        
+        //定义不为空的属性
+        else if(gzbzgl.getProp("tp_faultname") == null || gzbzgl.getProp("tp_faultname").equals("")){
+            throw new BussinessProcessException("故障名称不能为空!");
+        }/*
+        else{
+           return gzbzgl;
+        }
+        */
+        else{ return gzbzgl;}
+    }
+}

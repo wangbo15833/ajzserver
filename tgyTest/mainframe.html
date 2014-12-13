@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<title>导航栏</title>
+
+<style type="text/css">
+#my_sub_info {
+	width: 100%;
+	float:left;
+	background-image: url(../images/manage_r3_c11.jpg);
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 2px;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-right-color: #B4C9C6;
+	border-bottom-color: #B4C9C6;
+	border-left-color: #f1f1f1;
+	height: 27px;
+	background-repeat: repeat-x;
+	padding: 5px 0 0 0;
+	color:#ffffff;
+}
+</style>
+
+</head>
+
+
+
+
+
+<script  type="text/javascript">
+
+/**
+*   COPYRIGHT NOTICE
+*   Copyright (c) 2013, 李振南 (版权声明)
+*   All rights reserved.
+*
+*   @file   mainframe.html
+*   @function  list_sub_nav
+*   @brief
+*		当点击时候改变 属性
+*		往左边传递参数
+*   @retval 
+*
+*   @version    1.0
+*   @author floatsnowflakes(floatsnowflakes@hotmail.com)
+*   @date   2013-3-25
+*
+*   @NOTE
+*/
+var preClassName = "man_nav_1";
+function list_sub_nav(Id,sortname){
+   if(preClassName != ""){
+      getObject(preClassName).className="bg_image";
+   }
+   
+   if(getObject(Id).className == "bg_image"){
+      getObject(Id).className="bg_image_onclick";
+      preClassName = Id;	//保持全局变量
+			showInnerText(Id);	//设置提示
+			//联动左边栏目  MenuObj
+			window.top.indexFrame.frames['leftFrame'].MenuObj.getbytitle(sortname);
+			window.top.indexFrame.frames['leftFrame'].MenuObj.getdefaultnav(sortname);
+	}
+}
+
+/**
+*   COPYRIGHT NOTICE
+*   Copyright (c) 2013, 李振南 (版权声明)
+*   All rights reserved.
+*
+*   @file   mainframe.html
+*   @function  showInnerText
+*   @brief
+*		根据点击的导航栏显示相应的提示*		
+*   @retval 
+*		传入ID值
+*   @version    1.0
+*   @author floatsnowflakes(floatsnowflakes@hotmail.com)
+*   @date   2013-3-25
+*
+*   @NOTE	截去前8个字符得到结果转换为数字
+*/
+function showInnerText(Id){
+    var switchId = parseInt(Id.substring(8));
+	var showText = "对不起没有信息！";
+	switch(switchId){
+	   case 1:
+		   showText =  "返回网站首页，获取相应的提示操作！";
+		   break;
+	   case 2:
+		   showText =  "选择需要监控的车辆，开始检测！";
+		   break;
+	   case 3:
+		   showText =  "试验车辆管理，增加或删除监控车辆。";
+		   break;		   
+	   case 4:
+		   showText =  "对历史数据进行查询，生成图表、曲线和进行查询。";
+		   break;	
+	   case 5:
+		   showText =  "对技术标准进行设置，修改标准界限";
+		   break;	
+		 case 6:
+		   showText =  "系统维护，进行用户权限设置！";
+		   break;		
+		 case 7:
+		   showText =  "在线帮助，请输入您的问题！";
+		   break;		  		   	
+	}
+	//对id=show_text进行设置内容
+	getObject('show_text').innerHTML = showText;
+}
+ 
+ /**
+*   COPYRIGHT NOTICE
+*   Copyright (c) 2013, 李振南 (版权声明)
+*   All rights reserved.
+*
+*   @file   mainframe.html
+*   @function  getObject
+*   @brief
+*		获取该ID得对象
+*   @retval 
+*		传入ID值
+*   @version    1.0
+*   @author floatsnowflakes(floatsnowflakes@hotmail.com)
+*   @date   2013-3-25
+*
+*   @NOTE	兼容获取
+*/
+ function getObject(objectId) {
+    if(document.getElementById && document.getElementById(objectId)) {
+	// W3C DOM
+	return document.getElementById(objectId);
+    } else if (document.all && document.all(objectId)) {
+	// MSIE 4 DOM
+	return document.all(objectId);
+    } else if (document.layers && document.layers[objectId]) {
+	// NN 4 DOM.. note: this won't find nested layers
+	return document.layers[objectId];
+    } else {
+	return false;
+    }
+}
+</script>
+<body>
+<div id="nav">
+    <ul>
+      <li id="man_nav_1" onclick="list_sub_nav(id,'网站首页')"  class="bg_image_onclick">网站首页</li>
+      <li id="man_nav_2" onclick="list_sub_nav(id,'实时监控')"  class="bg_image">实时监控</li>
+      <li id="man_nav_3" onclick="list_sub_nav(id,'试验管理')"  class="bg_image">试验管理</li>
+      <li id="man_nav_4" onclick="list_sub_nav(id,'试验档案')"  class="bg_image">试验档案</li>
+      <li id="man_nav_5" onclick="list_sub_nav(id,'试验标准')"  class="bg_image">试验标准</li>
+	  <li id="man_nav_6" onclick="list_sub_nav(id,'系统维护')"  class="bg_image">系统维护</li>
+      <li id="man_nav_7" onclick="list_sub_nav(id,'在线帮助')"  class="bg_image">在线帮助</li>      
+  </ul>
+</div>
+<!--
+<div id="my_sub_info" style=" width:120px;float:left;">登录人:管理员</div>-->
+<div style="float:left;width:" id="sub_info">&nbsp;登录人:管理员&nbsp;||&nbsp;&nbsp;&nbsp;&nbsp;<span id="show_text">欢迎使用建设工程安全管理服务系统!</span></div>
+</body>
+</html>

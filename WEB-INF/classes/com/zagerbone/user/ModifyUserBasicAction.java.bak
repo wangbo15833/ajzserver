@@ -1,0 +1,71 @@
+package com.zagerbone.user;
+import com.shenghao.arch.action.BaseActionSupport;
+import com.shenghao.arch.event.Event;
+import com.shenghao.arch.event.EventResponse;
+import com.shenghao.arch.exception.BussinessProcessException;
+import java.util.HashMap;
+
+public class ModifyUserBasicAction extends BaseActionSupport
+{
+  public EventResponse perform(Event evt)
+    {
+        EventResponse returnValue = new EventResponse();
+        UserDAO dao = UserDAOFactory.getDAO();
+        try
+        {
+            User user = (User)processEvent(evt);
+            String userid = dao.modifyUserBasic(user);
+            returnValue.setSuccessFlag(true);
+            returnValue.setBody(userid);
+        }
+        catch(Exception me)
+        {
+            returnValue.setSuccessFlag(false);
+            returnValue.setErrorCode(evt.getFunctionID());
+            returnValue.setErrorMessage(me.getMessage().replace('\n', ' '));
+            return returnValue;
+        }
+        return returnValue;
+    }
+
+    public Object processEvent(Event evt)
+        throws BussinessProcessException
+    {
+      User user = new User();
+      HashMap hashBody = evt.getBody();
+      //username realname company address email telephone addition
+      	//user.setProp("userid", (String)evt.getUserid());
+      	user.setProp("userid",     (String)hashBody.get("userid"));
+      	user.setProp("username",   (String)hashBody.get("username"));
+      	user.setProp("realname",   (String)hashBody.get("realname"));
+      	user.setProp("company",    (String)hashBody.get("company"));
+      	user.setProp("address",    (String)hashBody.get("address"));
+        user.setProp("password",   (String)hashBody.get("password"));
+        user.setProp("email",      (String)hashBody.get("email"));
+        user.setProp("telephone",  (String)hashBody.get("telephone"));
+        user.setProp("addition",   (String)hashBody.get("addition"));
+        
+        user.setProp("userroles", (String)hashBody.get("userroles"));
+        user.setProp("work_unit", (String)hashBody.get("work_unit"));
+        user.setProp("work_unit_name", (String)hashBody.get("work_unit_name"));
+        user.setProp("usertype", (String)hashBody.get("usertype"));
+        //user.setProp("email", (String)hashBody.get("email"));
+        user.setProp("flag", (String)hashBody.get("flag"));
+        user.setProp("regdate", (String)hashBody.get("regdate"));
+        user.setProp("confirmdate", (String)hashBody.get("confirmdate"));
+        user.setProp("confirmpeople", (String)hashBody.get("confirmpeople"));
+        user.setProp("lastdate", (String)hashBody.get("lastdate"));
+        user.setProp("remark", (String)hashBody.get("remark"));
+        user.setProp("userrole_codes", (String)hashBody.get("userrole_codes"));
+        if(user.getProp("realname") == null || user.getProp("realname").equals(""))
+        {
+          throw new BussinessProcessException("±ÿ–Î ‰»Î–’√˚£°");
+        }
+        
+        else
+        {
+          return  user;
+        }
+    }
+
+}
